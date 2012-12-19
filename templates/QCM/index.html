@@ -1,0 +1,28 @@
+<form action="/qcm/" method="post">
+
+{% csrf_token %}
+<select name="subject">
+	<option value="mathematique">Mathematique</option>
+	<option value="physique">physique</option>
+</select>
+</br>
+<select name="class_level">
+	<option value="MPSI">MPSI</option>
+	<option value="PCSI">PCSI</option>
+	<option value="PSI">PSI</option>
+	<option value="MP">MP</option>
+	<option value="PC">PC</option>
+</select>
+</br>
+<select name="chapter">
+	<option value="geometrie">geometrie</option>
+	<option value="espace_vectoriel">espace vectoriel</option>
+	<option value="equation_differentielle">equation differentielle</option>
+</select>
+</br>
+
+<input type="submit" value="Commencer le QCM" />
+</form>
+
+<a href = '/logout'>logout</a>
+

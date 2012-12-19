@@ -1,0 +1,14 @@
+MANIFEST.in
+README.md
+UNLICENSE
+postgresify.py
+requirements.txt
+setup.cfg
+tests.py
+assets/postgresify.jpg
+pip-egg-info/django_heroku_postgresify.egg-info/PKG-INFO
+pip-egg-info/django_heroku_postgresify.egg-info/SOURCES.txt
+pip-egg-info/django_heroku_postgresify.egg-info/dependency_links.txt
+pip-egg-info/django_heroku_postgresify.egg-info/not-zip-safe
+pip-egg-info/django_heroku_postgresify.egg-info/requires.txt
+pip-egg-info/django_heroku_postgresify.egg-info/top_level.txt
