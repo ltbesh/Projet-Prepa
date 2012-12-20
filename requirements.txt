@@ -5,6 +5,11 @@ argparse==1.2.1
 wsgiref==0.1.2
 yolk==0.4.3
 
+
+
 ## Database backends
 ## PostgreSQL adapter for Python
 psycopg2==2.4.5
+
+# Needed for heroku
+dj-database-url==0.2.1
