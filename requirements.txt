@@ -10,6 +10,8 @@ yolk==0.4.3
 ## Database backends
 ## PostgreSQL adapter for Python
 psycopg2==2.4.5
+django-heroku-postgresify==0.2
+
 
 # Needed for heroku
 dj-database-url==0.2.1

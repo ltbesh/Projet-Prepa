@@ -1,22 +1,43 @@
 import datetime
 from django.utils import timezone
 from django.db import models
-
+from django.contrib.auth import User
 # Create your models here.
 
 from django.db import models
 
+
 class Question(models.Model):
-    question = models.CharField(max_length=200)
     pub_date = models.DateTimeField('date published')
-    good_answer = models.CharField(max_length=200)
-    bad_answer_1 = models.CharField(max_length=200)
-    bad_answer_2 = models.CharField(max_length=200)
-    bad_answer_3 = models.CharField(max_length=200)
+    creator = models.ForeignKey(User)
+   # moderators = models.ForeignKey(User) # We need to be able to assign several moderators
+    #validator = models.ForeignKey(User) #admin qui valide le passage a la bdd live
+    
+    question = models.CharField(max_length = 2000)
+    
+    # tags = models.ForeignKey(Tags) # Used for classifying question (course question, order of magnitude ...)
 
-    class_level = models.CharField(max_length=200)
+    chapitre = models.ForeignKey(Chapter)
 
-    subject = models.CharField(max_length=200)
+class Answer(models.Model):
+	question = models.ForeignKey(Question)
+	answer = models.CharField(200)
+	validity = models.BooleanField()
 
-    chapter = models.CharField(max_length=200)
+class Guess(models.Model):
+	user = models.ForeignKey(User)
+	answer = models.ForeignKey(Answer)
+	date = models.DateTimeField()
 
+
+#class Temporary_Questions(models.Model): # inherit from question, has comments from admin and moderators in addition to questions fields
+	
+
+class Chapter(models.Models):
+	subject = models.CharField(max_length = 200) #Physique, Chime, Histoire ...
+	level = models.CharField(max_length = 200) # Student class level 
+	name = models.CharField(max_length = 200) # name of the chapter : calculus, probability ...
+	
+#class Tags(models.Model):
+#	tag = models.CharField(max_length=15)
+	
