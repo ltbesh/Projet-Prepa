@@ -5,8 +5,6 @@ from django.contrib import admin
 class QuestionAdmin(admin.ModelAdmin):
 	fieldsets =  [
 		(None, {'fields' : ['question']}),
-		('Good Answer',{'fields':['good_answer']}),
-		('Bad Answers', {'fields' : ['bad_answer_1','bad_answer_2', 'bad_answer_3']}),
 		('Information de date', {'fields' : ['pub_date']}),
 		('Information de tag', {'fields' : ['class_level', 'subject', 'chapter']})
 

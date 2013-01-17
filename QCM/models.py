@@ -1,11 +1,17 @@
 import datetime
 from django.utils import timezone
 from django.db import models
-from django.contrib.auth import User
+from django.contrib.auth.models import User
 # Create your models here.
 
 from django.db import models
 
+
+class Chapter(models.Model):
+	subject = models.CharField(max_length = 200) #Physique, Chime, Histoire ...
+	level = models.CharField(max_length = 200) # Student class level 
+	name = models.CharField(max_length = 200) # name of the chapter : calculus, probability ...
+	
 
 class Question(models.Model):
     pub_date = models.DateTimeField('date published')
@@ -17,27 +23,23 @@ class Question(models.Model):
     
     # tags = models.ForeignKey(Tags) # Used for classifying question (course question, order of magnitude ...)
 
-    chapitre = models.ForeignKey(Chapter)
+    chapter = models.ForeignKey(Chapter)
 
 class Answer(models.Model):
 	question = models.ForeignKey(Question)
-	answer = models.CharField(200)
+	answer = models.CharField(max_length = 200)
 	validity = models.BooleanField()
 
 class Guess(models.Model):
 	user = models.ForeignKey(User)
 	answer = models.ForeignKey(Answer)
-	date = models.DateTimeField()
+	answer_date = models.DateTimeField('date answered')
 
 
 #class Temporary_Questions(models.Model): # inherit from question, has comments from admin and moderators in addition to questions fields
 	
 
-class Chapter(models.Models):
-	subject = models.CharField(max_length = 200) #Physique, Chime, Histoire ...
-	level = models.CharField(max_length = 200) # Student class level 
-	name = models.CharField(max_length = 200) # name of the chapter : calculus, probability ...
-	
+
 #class Tags(models.Model):
 #	tag = models.CharField(max_length=15)
 	
