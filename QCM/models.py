@@ -15,15 +15,15 @@ class Chapter(models.Model):
 
 class Question(models.Model):
     pub_date = models.DateTimeField('date published')
-    creator = models.ForeignKey(User)
-   # moderators = models.ForeignKey(User) # We need to be able to assign several moderators
+    #creator = models.ForeignKey(User)
+    #moderators = models.ForeignKey(User) # We need to be able to assign several moderators
     #validator = models.ForeignKey(User) #admin qui valide le passage a la bdd live
     
     question = models.CharField(max_length = 2000)
     
     # tags = models.ForeignKey(Tags) # Used for classifying question (course question, order of magnitude ...)
 
-    chapter = models.ForeignKey(Chapter)
+    #chapter = models.ForeignKey(Chapter)
 
 class Answer(models.Model):
 	question = models.ForeignKey(Question)
