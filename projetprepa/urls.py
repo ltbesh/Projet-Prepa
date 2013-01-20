@@ -11,6 +11,7 @@ urlpatterns = patterns('',
     url(r'^logout/$', 'django.contrib.auth.views.logout_then_login'),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
     url(r'^register/$', 'QCM.views.register'),
+    url(r'^confirm/$', 'QCM.views.confirm'),
     
     # Examples:
     # url(r'^$', 'projetprepa.views.home', name='home'),
