@@ -1,27 +1,33 @@
 from django import forms
 from django.core import validators
 from django.contrib.auth.models import User
-	
+
 class RegistrationForm(forms.Manipulator):
 	def __init__(self):
 		self.fields = (
-			forms.TextField(field_name='username',
-							length=30, maxlength=30,
-							is_required=True, validator_list=[validators.isAlphaNumeric,self.isValidUsername]),
-			forms.EmailField(field_name='email',
-							 length=30,
-							 maxlength=30,
-							 is_required=True),
-			forms.PasswordField(field_name='password1',
-								length=30,
-								maxlength=60,
-								is_required=True),
-			forms.PasswordField(field_name='password2',
-								length=30, maxlength=60,
-								is_required=True,
-								validator_list=[validators.AlwaysMatchesOtherField('password1','Passwords must match.')]),
+			forms.TextField(
+				field_name='username',
+				length=30, 
+				max_length=30,
+				is_required=True,
+				validator_list=[validators.isAlphaNumeric,self.isValidUsername]),
+			forms.EmailField(
+				field_name='email',
+				length=30,
+				max_length=30,
+				is_required=True),
+			forms.PasswordField(
+				field_name='password1',
+				length=30,
+				max_length=60,
+				is_required=True),
+			forms.PasswordField(
+				field_name='password2',
+				length=30, max_length=60,
+				is_required=True,
+				validator_list=[validators.AlwaysMatchesOtherField('password1','Passwords must match.')]),
 			)
-	
+
 	def isValidUsername(self, field_data, all_data):
 		try:
 			User.objects.get(username=field_data)

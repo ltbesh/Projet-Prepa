@@ -25,7 +25,7 @@ def qcm(request):
 def register(request):
 	if request.user.is_authenticated():
 		# They already have an account; don't let them register again
-		return render_to_response('registration/register.html', {'has_account': True})
+		return render_to_response('register.html', {'has_account': True})
 	manipulator = RegistrationForm()
 
 	if request.POST:
@@ -59,11 +59,11 @@ def register(request):
 					  'accounts@example.com',
 					  [new_user.email])
 			
-			return render_to_response('registration/register.html', {'created': True})
+			return render_to_response('register.html', {'created': True})
 	else:
 		errors = new_data = {}
 	form = forms.FormWrapper(manipulator, new_data, errors)
-	return render_to_response('registration/register.html', {'form': form})
+	return render_to_response('register.html', {'form': form})
 
 def confirm(request, activation_key):
 	if request.user.is_authenticated():
