@@ -118,7 +118,6 @@ INSTALLED_APPS = (
     'registration',
 )
 
-
 # Mail server info using sendgrid addon
 
 EMAIL_HOST = 'smtp.sendgrid.net'
