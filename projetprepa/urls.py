@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
     url(r'^register/$', 'QCM.views.register'),
     url(r'^confirm/$', 'QCM.views.confirm'),
+    url(r'^accounts/', include('registration.backends.default.urls')),
     
     # Examples:
     # url(r'^$', 'projetprepa.views.home', name='home'),

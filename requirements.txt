@@ -15,3 +15,6 @@ django-heroku-postgresify==0.2
 
 # Needed for heroku
 dj-database-url==0.2.1
+
+#Registration Appli
+django-registration==0.8

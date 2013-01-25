@@ -114,8 +114,20 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'QCM'
+    'QCM',
+    'registration',
 )
+
+
+# Mail server info using sendgrid addon
+
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'app10236395@heroku.com'
+EMAIL_HOST_PASSWORD = 'lgqgzu5f'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+ACCOUNT_ACTIVATION_DAYS = 7
 
 # FIX ME
 # Ajouter un template de profil a la place de cette redirection
