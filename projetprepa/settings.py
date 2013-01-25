@@ -129,13 +129,6 @@ EMAIL_USE_TLS = True
 
 ACCOUNT_ACTIVATION_DAYS = 7
 
-# FIX ME
-# Ajouter un template de profil a la place de cette redirection
-LOGIN_REDIRECT_URL = '/index'
-# FIX ME
-
-
-
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
