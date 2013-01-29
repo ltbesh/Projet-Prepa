@@ -19,9 +19,12 @@ South
 # Needed for heroku
 dj-database-url==0.2.1
 
-#Registration Appli
-django-registration==0.8
+#Registration Appli / Not used anymore / added directly to the project because modifs were made
+#django-registration==0.8
 
 #Debug
 django-debug-toolbar==0.9.4
 
+Mail server 
+sendgrid
+ 

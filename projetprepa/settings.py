@@ -7,6 +7,8 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
+SERVER_PORTS = 23
+
 MANAGERS = ADMINS
 
 AUTH_PROFILE_MODULE = 'QCM.UserProfile'
@@ -163,6 +165,12 @@ LOGGING = {
 
 # Needed by django debug toolbar
 INTERNAL_IPS = ('127.0.0.1',)
+
+#Prevent redirection stops
+DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS': False,
+}
+
 
 # Parse database configuration from $DATABASE_URL
 import dj_database_url
