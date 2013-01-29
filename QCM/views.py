@@ -22,6 +22,7 @@ def qcm(request):
 	question = questions[number]
 	return render_to_response('QCM/qcm.html', {'question' : question})
 
+@login_required()
 def questionselection(request): 
 	form = QuestionSelectionForm()
 	return render_to_response('QCM/questionselection.html',{'form': form})
