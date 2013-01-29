@@ -118,6 +118,7 @@ INSTALLED_APPS = (
     'QCM',
     'registration',
     'debug_toolbar',
+    'south',
 )
 
 # Mail server info using sendgrid addon
