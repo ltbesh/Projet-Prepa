@@ -18,3 +18,7 @@ dj-database-url==0.2.1
 
 #Registration Appli
 django-registration==0.8
+
+#Debug
+django-debug-toolbar==0.9.4
+

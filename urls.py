@@ -5,10 +5,10 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-	url(r'^index/$', 'QCM.views.index'),
-	url(r'^qcm/$', 'QCM.views.qcm'),
+	url(r'^$', 'QCM.views.index'),
 	url(r'^profil/$', 'QCM.views.index'),
     url(r'^accounts/', include('registration.backends.default.urls')),
+    url(r'^question/', include('QCM.urls')),
     # Examples:
     # url(r'^$', 'projetprepa.views.home', name='home'),
     # url(r'^projetprepa/', include('projetprepa.foo.urls')),

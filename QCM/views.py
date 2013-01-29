@@ -9,7 +9,7 @@ import datetime, random, sha
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.mail import send_mail
 from QCM.models import UserProfile
-#from QCM.forms import RegistrationForm
+from QCM.forms import QuestionSelectionForm
 
 @login_required()
 def index(request):
@@ -22,3 +22,6 @@ def qcm(request):
 	question = questions[number]
 	return render_to_response('QCM/qcm.html', {'question' : question})
 
+def questionselection(request): 
+	form = QuestionSelectionForm()
+	return render_to_response('QCM/questionselection.html',{'form': form})

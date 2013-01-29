@@ -89,6 +89,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -116,6 +117,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'QCM',
     'registration',
+    'debug_toolbar',
 )
 
 # Mail server info using sendgrid addon
@@ -156,6 +158,10 @@ LOGGING = {
         },
     }
 }
+
+
+# Needed by django debug toolbar
+INTERNAL_IPS = ('127.0.0.1',)
 
 # Parse database configuration from $DATABASE_URL
 import dj_database_url
