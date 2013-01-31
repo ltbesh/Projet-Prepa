@@ -13,16 +13,37 @@ from QCM.forms import QuestionSelectionForm
 
 @login_required()
 def index(request):
-	return render_to_response('QCM/index.html',context_instance=RequestContext(request))
+    return render_to_response('QCM/index.html',context_instance=RequestContext(request))
+
+# Display the form for initializing MCQ so that user create its MCQ based on chosen options
+@login_required()
+def question_selection(request): 
+    form = QuestionSelectionForm()
+    return render_to_response('QCM/questionselection.html',{'form': form})
+
+#Create a quizz and redirect to the first question display view
+@login_required()
+def start_quiz(request):
+    return
+# Display one question and its choice so that the user can choose the right answer
+@login_required()
+def question_display(request):
+    return
+
+# Save the answer of the user then redirect to the next answer or to the result page
+@login_required()
+def question_answer(request):
+    # Retrieve the user's answer in the POST array
+
+    # Save the answer in the database
+
+    # Compare the answer with the correct answer
+    return
 
 @login_required()
-def qcm(request):
-	questions = Question.objects.filter(subject = 'mathematique')
-	number = randint(0,len(questions)-1)
-	question = questions[number]
-	return render_to_response('QCM/qcm.html', {'question' : question})
-
+def display_quiz_results(request):
+    return
+    
 @login_required()
-def questionselection(request): 
-	form = QuestionSelectionForm()
-	return render_to_response('QCM/questionselection.html',{'form': form})
+def display_user_profile(request):
+    return
