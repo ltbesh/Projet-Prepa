@@ -6,20 +6,38 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 import datetime, random, sha
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, render
 from django.core.mail import send_mail
-from QCM.models import UserProfile
+from QCM.models import UserProfile, Quizz
 from QCM.forms import QuestionSelectionForm
 
 @login_required()
 def index(request):
-    return render_to_response('QCM/index.html',context_instance=RequestContext(request))
+	return render_to_response('QCM/index.html',context_instance=RequestContext(request))	
+
+@login_required()
+def user_profile(request):
+	return render_to_response('QCM/index.html',context_instance=RequestContext(request))	
 
 # Display the form for initializing MCQ so that user create its MCQ based on chosen options
 @login_required()
 def question_selection(request): 
-    form = QuestionSelectionForm()
-    return render_to_response('QCM/questionselection.html',{'form': form})
+    if request.method == 'POST': # If the form has been submitted...
+        form = QuestionSelectionForm(request.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            quizz=Quizz(request.POST["chapter"],request.POST["subject"],request.POST["level"],2)
+            return HttpResponseRedirect('/thanks/') # Redirect after POST
+    else:
+		form = QuestionSelectionForm()	
+		return render_to_response('QCM/questionselection.html',{'form': form},context_instance=RequestContext(request))
+
+
+
+
+    
+
+
+
 
 #Create a quizz and redirect to the first question display view
 @login_required()

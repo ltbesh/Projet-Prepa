@@ -5,6 +5,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
+	url(r'^$', 'QCM.views.index', name='index'),
     url(r'^accounts/', include('registration.backends.default.urls')),
     url(r'^question/', include('QCM.urls')),
 
