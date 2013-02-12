@@ -25,11 +25,13 @@ def question_selection(request):
     if request.method == 'POST': # If the form has been submitted...
         form = QuestionSelectionForm(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
-            quizz=Quizz(request.POST["chapter"],request.POST["subject"],request.POST["level"],2)
-            return HttpResponseRedirect('/thanks/') # Redirect after POST
-    else:
+			quizz=Quizz()
+			quizz.save()
+			quizz.new(request.POST["chapter"],request.POST["subject"],request.POST["level"],2)
+			return HttpResponseRedirect('/thanks/') # Redirect after POST
+	else:
 		form = QuestionSelectionForm()	
-		return render_to_response('QCM/questionselection.html',{'form': form},context_instance=RequestContext(request))
+		return render('QCM/questionselection.html',{'form': form})
 
 
 

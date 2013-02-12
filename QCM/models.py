@@ -51,14 +51,19 @@ class Quizz(models.Model):
 	date_started = models.DateTimeField('date started')
 	questions=models.ManyToManyField(Question)
 	
-	def __init__(self,chap,subj,lev,number=10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
-		question_list = Question.objects.all().filter(chapter=chap,subject=subj,level=lev).values_list()
-		random_list=random.shuffle(question_list)
-		self.questions = random_list[1:number]
-		user= 0
-	def __unicode__(self):
-		return self.user + "--" + self.date_started
-
+	@classmethod
+	def new(self,chap,subj,lev,number=10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
+		question_list = Question.objects.all().filter(chapter=chap,subject=subj,level=lev)
+		new_list=[]
+		for question in question_list:
+			new_list.append	(question)
+		random.shuffle(new_list)
+		new_list = new_list[1:number]
+		self.save()
+		for question in new_list:
+			self.questions.add(question)
+		self.save()
+		
 class Answer(models.Model):
 	question = models.ForeignKey(Question)
 	answer = models.CharField(max_length = 200)
