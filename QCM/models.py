@@ -71,7 +71,6 @@ class Quizz(models.Model):
 			self.questions.add(question)
 		
 		
-
 class Answer(models.Model):
 	question = models.ForeignKey(Question)
 	answer = models.CharField(max_length = 200)

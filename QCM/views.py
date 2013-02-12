@@ -31,8 +31,9 @@ def question_selection(request):
             quizz.save()
             return HttpResponseRedirect('question/start') # Redirect after POST
     else:
+
 		form = QuestionSelectionForm()	
-		return render_to_response('QCM/questionselection.html',{'form': form},context_instance=RequestContext(request))
+		return render('QCM/questionselection.html',{'form': form})
 
     
 
