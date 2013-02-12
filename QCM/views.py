@@ -1,5 +1,5 @@
 from django.template import RequestContext
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from QCM.models import Question
 from random import randint
 from django.contrib.auth.models import User
@@ -25,14 +25,14 @@ def question_selection(request):
     if request.method == 'POST': # If the form has been submitted...
         form = QuestionSelectionForm(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
-            quizz=Quizz(request.POST["chapter"],request.POST["subject"],request.POST["level"],2)
-            return HttpResponseRedirect('/thanks/') # Redirect after POST
+            quizz=Quizz.new(request.user)
+            quizz.save()
+            quizz.append(request.POST["chapter"],request.POST["subject"],request.POST["level"],2)
+            quizz.save()
+            return HttpResponseRedirect('question/start') # Redirect after POST
     else:
 		form = QuestionSelectionForm()	
 		return render_to_response('QCM/questionselection.html',{'form': form},context_instance=RequestContext(request))
-
-
-
 
     
 
@@ -41,8 +41,13 @@ def question_selection(request):
 
 #Create a quizz and redirect to the first question display view
 @login_required()
-def start_quiz(request):
-    return
+def start_quizz(request):
+	quizz=Quizz.objects.all()
+	quizzlist=[]
+	for quizzz in quizz:
+		quizzlist.append(quizzz)
+	quizz=quizzlist[0]
+	return render_to_response('QCM/start_quizz.html',{'quizz':quizz},context_instance=RequestContext(request))
 # Display one question and its choice so that the user can choose the right answer
 @login_required()
 def question_display(request):

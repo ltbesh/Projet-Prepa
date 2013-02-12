@@ -2,6 +2,9 @@ import datetime, random
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
+import time
+from time import mktime
+from datetime import datetime
 
 class UserProfile(models.Model):
 	user = models.OneToOneField(User)
@@ -51,13 +54,23 @@ class Quizz(models.Model):
 	date_started = models.DateTimeField('date started')
 	questions=models.ManyToManyField(Question)
 	
-	def __init__(self,chap,subj,lev,number=10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
-		question_list = Question.objects.all().filter(chapter=chap,subject=subj,level=lev).values_list()
-		random_list=random.shuffle(question_list)
-		self.questions = random_list[1:number]
-		user= 0
-	def __unicode__(self):
-		return self.user + "--" + self.date_started
+	@classmethod
+	def new(cls,use):
+		struct=time.localtime()
+		quizz=cls(user=use,date_started=datetime.fromtimestamp(mktime(struct)))
+		return quizz
+		
+	def append(self,chap,subj,lev,number=10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
+		question_list = Question.objects.all().filter(chapter=chap,subject=subj,level=lev)
+		newlist=[]
+		for question in question_list:
+			newlist.append(question)
+		random.shuffle(newlist)
+		newlist=newlist[1:number]
+		for question in newlist:
+			self.questions.add(question)
+		
+		
 
 class Answer(models.Model):
 	question = models.ForeignKey(Question)
