@@ -8,7 +8,7 @@ from django.contrib.auth.forms import UserCreationForm
 import datetime, random, sha
 from django.shortcuts import render_to_response, get_object_or_404, render
 from django.core.mail import send_mail
-from QCM.models import UserProfile, Quizz, Question, Answer
+from QCM.models import UserProfile, Quizz
 from QCM.forms import QuestionSelectionForm
 
 @login_required()
@@ -35,63 +35,31 @@ def question_selection(request):
 		form = QuestionSelectionForm()	
 		return render_to_response('QCM/questionselection.html',{'form': form},context_instance=RequestContext(request))
 
-question_list=[]
-i=0
-
+#retrieve the question list and first question display view
 @login_required()
 def start_quizz(request):
-
-	def make_quizz():
-		global i
-		global question_list
-		i=0
+	if request.method == 'POST': #on demarre la question i+1
+		i=i+1
+		#tester si questions[i] existe, si oui -> display, si non -> fin du test -> resultat
+		
+	else:
 		quizz=Quizz.objects.all()
 		quizzlist=[]
+		
 		for quizzz in quizz:
 			quizzlist.append(quizzz)
-		quizz=quizzlist[-1] # load the last quizz #FIXME:MK:: make the question_selection view pass the quizz instead of retrieving it this way to avoid DB mayhem?
+			
+		quizz=quizzlist[-1] # load the last quizz 
+		#FIXME:MK:: make the question_selection view pass the quizz instead of retrieving it this way to avoid DB mayhem?
 		
 		questions=quizz.questions.all()
-		global question_list
 		question_list=[]
 		for question in questions:
-			global question_list
 			question_list.append(question)
-		return question_list
-		
-	if request.method == 'POST': #on demarre la question i+1
-		print len(question_list)
-		print question_list
-		global question_list
-		global i
-		if i<len(question_list)-1:
-			global i
-			i=i+1
-			quest=question_list[i]
-			answerlist=[]
-			for answer in Answer.objects.all().filter(question=quest.id):
-				answerlist.append(answer)
-			
-			random.shuffle(answerlist)
-			
-			return render_to_response('QCM/start_quizz.html',{'answers':answerlist, 'question':quest},context_instance=RequestContext(request))
-			
-		else:
-			return HttpResponseRedirect('question/end')
-	else:
-		
-		question_list=make_quizz()
-
-		
+		i=0
 		#utiliser directement quizz.questions.all()[i] ? apres transfo en liste
-		quest=question_list[0]
-		answerlist=[]
-		for answer in Answer.objects.all().filter(question=quest.id):
-			answerlist.append(answer)
-		
-		random.shuffle(answerlist)
-		
-		return render_to_response('QCM/start_quizz.html',{'answers':answerlist, 'question':quest},context_instance=RequestContext(request))
+		question=question_list[0]
+		return render_to_response('QCM/start_quizz.html',{'quizz':quizz,'questions':question_list, 'question':question},context_instance=RequestContext(request))
 
 # Display one question and its choice so that the user can choose the right answer
 @login_required()
@@ -107,9 +75,6 @@ def question_answer(request):
 
     # Compare the answer with the correct answer
     return
-@login_required()
-def end_quizz(request):
-	return render_to_response('QCM/end_quizz.html',context_instance=RequestContext(request))
 
 @login_required()
 def display_quiz_results(request):

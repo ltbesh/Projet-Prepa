@@ -14,15 +14,18 @@ string.uppercase[i]+
 
 <ul>
 	<p>
-		{{question}}
+		résultat
 	</p>
-
-	{% for a in answers%}
-		<form action="question/selection/question/start/" method="post">
-		{% csrf_token %}
-		<td><input type="submit" name= {{ a}}  value="{{ a }}" /></td>
-		</tr>
-		<p></p>
+	
+	{% for q in answers%}
+	<p>{{q}}</p>
+		{% for a in q.answers%}
+			{% if a.validity %}
+				<p>{{a}}</p> en vert
+			{% else %}
+				<p>{{a}}</p> en rouge
+			{% endif %}
+		{% endfor %}
 	{% endfor %}
 
 
