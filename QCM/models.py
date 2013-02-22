@@ -49,15 +49,28 @@ class Question(models.Model):
 class Quizz(models.Model):
 	user = models.ForeignKey(User)
 	date_started = models.DateTimeField('date started')
-	questions=models.ManyToManyField(Question)
+	questions = models.ManyToManyField(Question)
 	
-	def __init__(self,chap,subj,lev,number=10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
-		question_list = Question.objects.all().filter(chapter=chap,subject=subj,level=lev).values_list()
-		random_list=random.shuffle(question_list)
-		self.questions = random_list[1:number]
-		user= 0
-	def __unicode__(self):
-		return self.user + "--" + self.date_started
+	def create_quizz(self ):
+		pass
+
+
+	def create_inactive_user(self, username, email, password, site, send_email=True):
+
+		"""
+		Create a new, inactive ``User``, generate a
+		``RegistrationProfile`` and email its activation key to the
+		``User``, returning the new ``User``.
+
+		By default, an activation email will be sent to the new
+		user. To disable this, pass ``send_email=False``.
+
+		"""
+		new_user = User.objects.create_user(username, email, password)
+		new_user.is_active = False
+		new_user.save()
+
+
 
 class Answer(models.Model):
 	question = models.ForeignKey(Question)
