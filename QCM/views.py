@@ -29,6 +29,8 @@ def question_selection(request):
             quizz.save()
             quizz.append(request.POST["chapter"],request.POST["subject"],request.POST["level"],request.POST["number"])
             quizz.save()
+            #deplacer le make quizz ici
+            request.session['quizz']=quizz
             return HttpResponseRedirect('question/start') # Redirect after POST
     else:
 
@@ -101,4 +103,29 @@ def start_quizz(request):
 
 @login_required()
 def end_quizz(request):
-	return render_to_response('QCM/end_quizz.html',context_instance=RequestContext(request))
+	q = request.session['quizz']
+	guess_list = []
+	guess = Guess.objects.filter(quizz=q)
+	note = 0
+	liste=[]
+	
+	for g in guess:
+		liste2=[]
+		guess_list.append(g)
+		liste2.append(g.answer.question)
+		liste2.append(g.answer)
+		if g.answer.validity:
+			note = note + 1
+			liste2.append(g.answer)
+		else:
+			plop = Answer.objects.filter(question=g.answer.question, validity=1)
+			try:
+				liste2.append(plop[0])
+			except IndexError , e:
+				liste2.append("Il n'y avait pas de bonne reponse")
+				
+		liste.append(liste2)
+	print liste
+	note_finale = (note / float(len(guess_list))) * 20.0
+	
+	return render_to_response('QCM/end_quizz.html',{'note_finale' : note_finale, 'liste' : liste}, context_instance=RequestContext(request))

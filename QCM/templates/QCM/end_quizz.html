@@ -14,18 +14,13 @@ string.uppercase[i]+
 
 <ul>
 	<p>
-		résultat
+		résultat {{note_finale}} / 20
 	</p>
 	
-	{% for q in answers%}
-	<p>{{q}}</p>
-		{% for a in q.answers%}
-			{% if a.validity %}
-				<p>{{a}}</p> en vert
-			{% else %}
-				<p>{{a}}</p> en rouge
-			{% endif %}
-		{% endfor %}
+	{% for l in liste%}
+	<p>{{l.0}}</p>
+		<p>Votre réponse : {{l.1}}</p>
+		<p>La bonne réponse était : {{l.2}}</p>
 	{% endfor %}
 
 
