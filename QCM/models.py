@@ -75,9 +75,12 @@ class Quizz(models.Model):
 		for question in question_list:
 			newlist.append(question)
 		random.shuffle(newlist)
-		newlist=newlist[0:number-1]
+		newlist=newlist[0:int(number)-1]
 		for question in newlist:
 			self.questions.add(question)
+	def __unicode__ (self):
+			return str(self.user)+"--"+str(self.date_started)
+			
 		
 		
 class Answer(models.Model):
@@ -93,6 +96,11 @@ class Guess(models.Model):
 	quizz = models.ForeignKey(Quizz)
 	answer = models.ForeignKey(Answer)
 	answer_date = models.DateTimeField('date answered')
+	@classmethod
+	def new(cls,use,ans):
+		struct=time.localtime()
+		quizz=cls(quizz=use,answer=ans,answer_date=datetime.fromtimestamp(mktime(struct)))
+		return quizz
 
 
 

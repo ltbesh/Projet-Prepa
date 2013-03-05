@@ -8,7 +8,7 @@ from django.contrib.auth.forms import UserCreationForm
 import datetime, random, sha
 from django.shortcuts import render_to_response, get_object_or_404, render
 from django.core.mail import send_mail
-from QCM.models import UserProfile, Quizz, Question, Answer
+from QCM.models import UserProfile, Quizz, Question, Answer, Guess
 from QCM.forms import QuestionSelectionForm
 
 @login_required()
@@ -27,7 +27,7 @@ def question_selection(request):
         if form.is_valid(): # All validation rules pass
             quizz=Quizz.new(request.user)
             quizz.save()
-            quizz.append(request.POST["chapter"],request.POST["subject"],request.POST["level"],3)
+            quizz.append(request.POST["chapter"],request.POST["subject"],request.POST["level"],request.POST["number"])
             quizz.save()
             return HttpResponseRedirect('question/start') # Redirect after POST
     else:
@@ -37,6 +37,7 @@ def question_selection(request):
 
 question_list=[]
 i=0
+quizz=0
 
 @login_required()
 def start_quizz(request):
@@ -44,13 +45,14 @@ def start_quizz(request):
 	def make_quizz():
 		global i
 		global question_list
+		global quizz
 		i=0
 		quizz=Quizz.objects.all()
 		quizzlist=[]
 		for quizzz in quizz:
 			quizzlist.append(quizzz)
-		quizz=quizzlist[-1] # load the last quizz #FIXME:MK:: make the question_selection view pass the quizz instead of retrieving it this way to avoid DB mayhem?
-		
+		global quizz
+		quizz=quizzlist[-1] # load the last quizz #FIXME: make the question_selection view pass the quizz instead of retrieving it this way to avoid DB mayhem?
 		questions=quizz.questions.all()
 		global question_list
 		question_list=[]
@@ -59,9 +61,15 @@ def start_quizz(request):
 			question_list.append(question)
 		return question_list
 		
-	if request.method == 'POST': #on demarre la question i+1
-		print len(question_list)
-		print question_list
+	if request.method == 'POST': 
+	
+		ans=request.POST["answer"]		
+		ans=Answer.objects.all().filter(question=question_list[i].id, answer=ans)
+		ans = ans[0]
+
+		guess=Guess.new(quizz,ans) #quizz & answer sont des foreignkey
+		guess.save()
+		
 		global question_list
 		global i
 		if i<len(question_list)-1:
@@ -71,19 +79,16 @@ def start_quizz(request):
 			answerlist=[]
 			for answer in Answer.objects.all().filter(question=quest.id):
 				answerlist.append(answer)
-			
 			random.shuffle(answerlist)
 			
 			return render_to_response('QCM/start_quizz.html',{'answers':answerlist, 'question':quest},context_instance=RequestContext(request))
 			
 		else:
 			return HttpResponseRedirect('question/end')
+
 	else:
 		
 		question_list=make_quizz()
-
-		
-		#utiliser directement quizz.questions.all()[i] ? apres transfo en liste
 		quest=question_list[0]
 		answerlist=[]
 		for answer in Answer.objects.all().filter(question=quest.id):

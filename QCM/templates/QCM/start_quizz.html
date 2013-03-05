@@ -20,7 +20,7 @@ string.uppercase[i]+
 	{% for a in answers%}
 		<form action="question/selection/question/start/" method="post">
 		{% csrf_token %}
-		<td><input type="submit" name= {{ a}}  value="{{ a }}" /></td>
+		<td><input type="submit" name= "answer"  value="{{ a }}" /></td>
 		</tr>
 		<p></p>
 	{% endfor %}
