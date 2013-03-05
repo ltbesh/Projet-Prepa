@@ -98,28 +98,7 @@ def start_quizz(request):
 		
 		return render_to_response('QCM/start_quizz.html',{'answers':answerlist, 'question':quest},context_instance=RequestContext(request))
 
-# Display one question and its choice so that the user can choose the right answer
-@login_required()
-def question_display(request):
-    return
 
-# Save the answer of the user then redirect to the next answer or to the result page
-@login_required()
-def question_answer(request):
-    # Retrieve the user's answer in the POST array
-
-    # Save the answer in the database
-
-    # Compare the answer with the correct answer
-    return
 @login_required()
 def end_quizz(request):
 	return render_to_response('QCM/end_quizz.html',context_instance=RequestContext(request))
-
-@login_required()
-def display_quiz_results(request):
-    return
-    
-@login_required()
-def display_user_profile(request):
-    return
