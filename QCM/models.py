@@ -55,7 +55,7 @@ class Quizz(models.Model):
 		pass
 
 
-	def create_inactive_user(self, username, email, password, site, send_email=True):
+	def create_inactive_user(self, username, email, password, site, send_email = True):
 
 		"""
 		Create a new, inactive ``User``, generate a

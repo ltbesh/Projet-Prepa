@@ -11,8 +11,8 @@ urlpatterns = patterns('',
     url(r'answer/(?P<pk>\d+)$', 'QCM.views.question_answer', name = 'QCM_question_answer'),
     url(r'quiz/results$', 'QCM.views.display_quiz_results', name = 'QCM_quiz_results'),
 
-    #FIX ME : User profil can not be in the question app
-    url(r'account/$', 'QCM.views.user_profile', name = 'user_profile'),
+    #FIX ME : User profile can not be in the question app
+    url(r'account/$', 'QCM.views.display_user_profile', name = 'display_user_profile'),
 
 )
 

@@ -28,3 +28,6 @@ django-debug-toolbar==0.9.4
 #Mail server 
 sendgrid
  
+
+#Graph drawing
+pygooglechart
