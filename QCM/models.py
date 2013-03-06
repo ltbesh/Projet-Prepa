@@ -2,39 +2,51 @@ import datetime, random
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
+import time
+from time import mktime
+from datetime import datetime
 
-class UserProfile(models.Model):
+class UserProfile(models.Model): #Used for registration
 	user = models.OneToOneField(User)
 	activation_key = models.CharField(max_length = 40)
 	key_expires = models.DateTimeField()
+	
+#FIXME:MK: can we merge UserProfile & PlayerProfile?
 
-# Example : Mathematique, Physics, Chemistry ...
-class Subject(models.Model):
+#~ class PlayerProfile(models.Model): #Our custom User. OneToOneField/ForeignKey relationship with User
+	#~ user = models.OneToOneField(User) #Or ForeignKey ?
+	#~ current_quizz = models.OneToOneField(Quizz) #Can be empty: to retrieve un-finished quizz
+	#~ #level = models.CharField() #Player Level (Terminale S, MPSI, MedecineP1...)
+	#~ #school = models.CharField() #OneToOne avec Lycee? 
+	#~ #contributor = models.BooleanField() #0=NO 1=YES
+	#~ # stats = ???
+	#~ quizz = models.ManyToManyField(Quizz) #list of requested quizz : FIXME: MK: Not needed?
+
+
+class Subject(models.Model):# Example : Mathematique, Physics, Chemistry ...
 	name = models.CharField(max_length = 200)
 
 	def __unicode__ (self):
 		return self.name
 
-# Example : MPSI, PCSI ...
-class Level(models.Model):
+
+class Level(models.Model):# Example : MPSI, PCSI ...
 	name = models.CharField(max_length = 200)
 
 	def __unicode__ (self):
 		return self.name
 
-# Example : Calculus, algebra ...
-class Chapter(models.Model):
+
+class Chapter(models.Model):# Example : Calculus, algebra ...
 	name = models.CharField(max_length = 200) # name of the chapter : calculus, probability ...
 	
 	def __unicode__ (self):
 		return self.name
 
-# Questions that are to be answered by the students
-
-
 #FIX ME
-#FIX ME : Should we put the id of the correct answer instead of the boolean fiels validity in the answer model ???
-#FIX ME
+#FIX ME LTB: Should we put the id of the correct answer instead of the boolean fiels validity in the answer model ??? 
+#FIX ME MK: Nope? It is easier to do tests with booleans?
+
 class Question(models.Model):
 	level = models.ForeignKey(Level)
 	subject = models.ForeignKey(Subject)
@@ -51,27 +63,25 @@ class Quizz(models.Model):
 	date_started = models.DateTimeField('date started')
 	questions = models.ManyToManyField(Question)
 	
-	def create_quizz(self ):
-		pass
-
-
-	def create_inactive_user(self, username, email, password, site, send_email = True):
-
-		"""
-		Create a new, inactive ``User``, generate a
-		``RegistrationProfile`` and email its activation key to the
-		``User``, returning the new ``User``.
-
-		By default, an activation email will be sent to the new
-		user. To disable this, pass ``send_email=False``.
-
-		"""
-		new_user = User.objects.create_user(username, email, password)
-		new_user.is_active = False
-		new_user.save()
-
-
-
+	@classmethod
+	def new(cls,use):
+		struct=time.localtime()
+		quizz=cls(user=use,date_started=datetime.fromtimestamp(mktime(struct)))
+		return quizz
+		
+	def append(self,chap,subj,lev,number=10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
+		question_list = Question.objects.all().filter(chapter=chap,subject=subj,level=lev)
+		newlist=[]
+		for question in question_list:
+			newlist.append(question)
+		random.shuffle(newlist)
+		newlist=newlist[0:int(number)-1]
+		for question in newlist:
+			self.questions.add(question)
+	def __unicode__ (self):
+			return str(self.user)+"--"+str(self.date_started)
+			
+		
 class Answer(models.Model):
 	question = models.ForeignKey(Question)
 	answer = models.CharField(max_length = 200)
@@ -80,10 +90,16 @@ class Answer(models.Model):
 	def __unicode__ (self):
 		return self.answer
 
+#FIXME: MK: Not needed? 
 class Guess(models.Model):
 	quizz = models.ForeignKey(Quizz)
 	answer = models.ForeignKey(Answer)
 	answer_date = models.DateTimeField('date answered')
+	@classmethod
+	def new(cls,use,ans):
+		struct=time.localtime()
+		quizz=cls(quizz=use,answer=ans,answer_date=datetime.fromtimestamp(mktime(struct)))
+		return quizz
 
 
 

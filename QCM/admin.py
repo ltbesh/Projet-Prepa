@@ -1,4 +1,4 @@
-from QCM.models import Question, Answer, Chapter, Subject, Level, Quizz
+from QCM.models import Question, Answer, Chapter, Subject, Level, Quizz, Guess
 
 from django.contrib import admin
 
@@ -27,3 +27,4 @@ admin.site.register(Chapter)
 admin.site.register(Subject)
 admin.site.register(Level)
 admin.site.register(Quizz)
+admin.site.register(Guess)
