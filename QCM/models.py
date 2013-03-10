@@ -72,8 +72,8 @@ class Quizz(models.Model):
 		quizz=cls(user = use, date_started = datetime.fromtimestamp(mktime(struct)))
 		return quizz
 		
-	def append(self, chap, subj, lev, number = 2): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
-		question_list = Question.objects.all().filter(chapter = chap,subject = subj,level = lev)
+	def append(self, chap, subj, lev, number = 10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
+		question_list = Question.objects.all().filter(chapter = chap, subject = subj,level = lev)
 		newlist = []
 		self.level = Level.objects.filter(pk = lev)[0]
 		self.subject = Subject.objects.filter(pk = subj)[0]

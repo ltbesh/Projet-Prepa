@@ -126,7 +126,6 @@ def end_quizz(request):
 				
 		liste.append(liste2)
 
-	print liste
 	note_finale = (note / float(len(guess_list))) * 20.0
 	q.grade = note_finale
 	q.save()
@@ -139,15 +138,19 @@ def display_user_profile(request):
 	form = QuestionSelectionForm()
 
 	if request.method == 'POST':
-		if request.POST['quizz_id'] is not None:
-			print request.POST['quizz_id']
+		if 'quizz_id' in request.POST:
 			quizz = get_object_or_404(Quizz, pk = request.POST['quizz_id'])
 			request.session['quizz'] = quizz
 			return redirect('QCM_end_quizz')
-		quizz = quizz.filter(level = request.POST['level'], subject = request.POST['subject'], chapter = request.POST['chapter'])
+
+		quizz = quizz.filter(
+			level = request.POST['level'], 
+			subject = request.POST['subject'], 
+			chapter = request.POST['chapter'])
 		form = QuestionSelectionForm(request.POST)
 
 	grade = quizz.aggregate(Avg('grade'))["grade__avg"]
+
 	return render_to_response('QCM/user_profile.html', {
 		'form' : form,
 		'quizz' : quizz,
