@@ -29,78 +29,50 @@ def question_selection(request):
             quizz.save()
             quizz.append()
             quizz.save()
-            request.session['quizz']=quizz
+            request.session['quizz'] = quizz
             return HttpResponseRedirect('question/start') # Redirect after POST
     else:
-
 		form = QuestionSelectionForm()	
 		return render_to_response('QCM/questionselection.html',{'form': form},context_instance=RequestContext(request))
 
 
 @login_required()
 def start_quizz(request):
-		
-	if request.method == 'POST': 
 	
-		quizz = request.session['quizz']
-		ans = request.POST["answer"]
-		
-		ans = Answer.objects.all().filter(answer=ans, question=request.session['question'])
-		ans = ans[0]
-		
-		guess = Guess.new(quizz,ans) 
-		guess.save()
-		question_list=Question.objects.filter(quizz=quizz)
-		guess_list=Guess.objects.filter(quizz=quizz)
-		
-		q_l=[]
-		for q in question_list:
-			q_l.append(q)
-		question_list=q_l
-		
-		for g in guess_list:
-			question_list.remove(g.answer.question)
-		random.shuffle(question_list)
-		
-		try: 
-			request.session['question']=question_list[0]
-			answerlist=[]
-			for answer in Answer.objects.filter(question = request.session['question']):
-				answerlist.append(answer)
-			random.shuffle(answerlist)
-			return render_to_response('QCM/start_quizz.html',{'answers':answerlist, 'question':request.session['question']},context_instance = RequestContext(request))
-			
-		except:
-			
-			return HttpResponseRedirect('question/end')
+	quizz = request.session['quizz']
 
-	else:
-		
-		quizz = request.session['quizz']
-		
-		question_list=Question.objects.filter(quizz=quizz)
-		guess_list=Guess.objects.filter(quizz=quizz)
-		
-		q_l=[]
-		for q in question_list:
-			q_l.append(q)
-		question_list=q_l
-		
-		for g in guess_list:
-			question_list.remove(g.answer.question)
-		random.shuffle(question_list)
-		
-		try: 
-			request.session['question']=question_list[0]
-			answerlist=[]
-			for answer in Answer.objects.filter(question = request.session['question']):
-				answerlist.append(answer)
-			random.shuffle(answerlist)
-			return render_to_response('QCM/start_quizz.html',{'answers':answerlist, 'question':request.session['question']},context_instance = RequestContext(request))
+	if request.method == 'POST': 
+		answer = request.POST["answer"]
+		answer = Answer.objects.filter(answer = answer, question = request.session['question'])[0]
+		guess = Guess.new(quizz,answer) 
+		guess.save()
+
+	question_request=Question.objects.filter(quizz = quizz)
+	guess_request=Guess.objects.filter(quizz = quizz)
+
+	question_list = []
+	for q in question_request:
+		question_list.append(q)
+	
+	for g in guess_request:
+		question_list.remove(g.answer.question)
+	random.shuffle(question_list)
+
+	try: 
+		request.session['question'] = question_list[0]
+	except:
+		return HttpResponseRedirect('question/end')
+
+	answerlist = []
+	for answer in Answer.objects.filter(question = request.session['question']):
+		answerlist.append(answer)
+	random.shuffle(answerlist)
+
+	return render_to_response('QCM/start_quizz.html',{
+		'answers':answerlist, 
+		'question':request.session['question']
+		},context_instance = RequestContext(request))
 			
-		except:
-			print sys.exc_info()
-			return HttpResponseRedirect('question/end')
 
 @login_required()
 def end_quizz(request):
@@ -108,7 +80,6 @@ def end_quizz(request):
 	guess_list = []
 	guess = Guess.objects.filter(quizz = q)
 	
-	print guess
 	note = 0
 	liste = []
 	
@@ -131,9 +102,9 @@ def end_quizz(request):
 
 	try:
 		note_finale = (note / float(len(guess_list))) * 20.0
-		note_finale=round(note_finale, 1)
+		note_finale = round(note_finale, 1)
 	except:
-		pass
+		note_fina
 	q.grade = note_finale
 	q.save()
 	return render_to_response('QCM/end_quizz.html',{'note_finale' : note_finale, 'liste' : liste}, context_instance = RequestContext(request))
