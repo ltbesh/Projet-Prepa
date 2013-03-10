@@ -17,13 +17,6 @@ from django.shortcuts import redirect
 
 @login_required()
 def index(request):
-	Questions = Question.objects.all()
-	question_list = []
-	for q in Questions:
-		question_list.append(q)
-
-
-
 	return render_to_response('QCM/index.html', {'question_list':question_list}, context_instance=RequestContext(request))	
 
 # Display the form for initializing MCQ so that user create its MCQ based on chosen options
@@ -32,9 +25,9 @@ def question_selection(request):
     if request.method == 'POST': # If the form has been submitted...
         form = QuestionSelectionForm(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
-            quizz = Quizz.new(request.user)
+            quizz = Quizz.new(request.user,request.POST["chapter"],request.POST["subject"],request.POST["level"])
             quizz.save()
-            quizz.append(request.POST["chapter"],request.POST["subject"],request.POST["level"])
+            quizz.append()
             quizz.save()
             #deplacer le make quizz ici
             request.session['quizz']=quizz
@@ -73,11 +66,11 @@ def start_quizz(request):
 		
 	if request.method == 'POST': 
 	
-		ans=request.POST["answer"]		
-		ans=Answer.objects.all().filter(question=question_list[i].id, answer=ans)
+		ans = request.POST["answer"]
+		ans = Answer.objects.all().filter(question=question_list[i].id, answer=ans)
 		ans = ans[0]
-
-		guess=Guess.new(quizz,ans) #quizz & answer sont des foreignkey
+		quizz = request.session['quizz']
+		guess = Guess.new(quizz,ans) #quizz & answer sont des foreignkey
 		guess.save()
 		
 		global question_list
@@ -113,6 +106,7 @@ def end_quizz(request):
 	q = request.session['quizz']
 	guess_list = []
 	guess = Guess.objects.filter(quizz = q)
+	print guess
 	note = 0
 	liste = []
 	
@@ -133,7 +127,10 @@ def end_quizz(request):
 				
 		liste.append(liste2)
 
-	note_finale = (note / float(len(guess_list))) * 20.0
+	try:
+		note_finale = (note / float(len(guess_list))) * 20.0
+	except:
+		pass
 	q.grade = note_finale
 	q.save()
 	return render_to_response('QCM/end_quizz.html',{'note_finale' : note_finale, 'liste' : liste}, context_instance = RequestContext(request))

@@ -67,17 +67,17 @@ class Quizz(models.Model):
 	grade = models.IntegerField(default = 0)
 
 	@classmethod
-	def new(cls,use):
+	def new(cls,use, chap, subj, lev, number = 10):
 		struct=time.localtime()
-		quizz=cls(user = use, date_started = datetime.fromtimestamp(mktime(struct)))
+		level = Level.objects.filter(pk = lev)[0]
+		subject = Subject.objects.filter(pk = subj)[0]
+		chapter = Chapter.objects.filter(pk = chap)[0]
+		quizz=cls(user = use, level = level, subject = subject, chapter = chapter, date_started = datetime.fromtimestamp(mktime(struct)))
 		return quizz
 		
-	def append(self, chap, subj, lev, number = 10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
-		question_list = Question.objects.all().filter(chapter = chap, subject = subj,level = lev)
+	def append(self, number = 10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
+		question_list = Question.objects.all().filter(chapter = self.chapter, subject = self.subject,level = self.level)
 		newlist = []
-		self.level = Level.objects.filter(pk = lev)[0]
-		self.subject = Subject.objects.filter(pk = subj)[0]
-		self.chapter = Chapter.objects.filter(pk = chap)[0]
 		for question in question_list:
 			newlist.append(question)
 		random.shuffle(newlist)

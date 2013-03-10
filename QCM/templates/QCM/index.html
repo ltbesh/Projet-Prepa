@@ -6,9 +6,5 @@
 <p><a href="{% url QCM_selection %}">{% trans "New Quizz" %}</a></p>
 <p><a href="{% url user_profile %}">{% trans "Profile" %}</a></p>
 
-{% for q in question_list %}
-	<p>{{q.question}}</p>
-
-{% endfor %}
 
 {% endblock %}
