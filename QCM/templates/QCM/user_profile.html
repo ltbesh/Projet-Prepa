@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+
+
+<body>
+
+<ul>
+	<p>
+		Votre moyene :  {{grade}} / 20
+	</p>
+	
+	{% for l in liste%}
+	<p>{{l.0}}</p>
+		<p>Votre réponse : {{l.1}}</p>
+		<p>La bonne réponse était : {{l.2}}</p>
+	{% endfor %}
+
+
+</ul>
+</body>
+{% endblock %}
+

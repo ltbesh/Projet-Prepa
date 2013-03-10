@@ -10,6 +10,7 @@ from django.shortcuts import render_to_response, get_object_or_404, render
 from django.core.mail import send_mail
 from QCM.models import UserProfile, Quizz, Question, Answer, Guess
 from QCM.forms import QuestionSelectionForm
+from django.db.models import Avg
 
 
 
@@ -127,3 +128,13 @@ def end_quizz(request):
 	note_finale = (note / float(len(guess_list))) * 20.0
 	
 	return render_to_response('QCM/end_quizz.html',{'note_finale' : note_finale, 'liste' : liste}, context_instance=RequestContext(request))
+
+@login_required
+def display_user_profile(request):
+	quizz = Quizz.objects.filter(user = request.user)
+
+	grade = quizz.aggregate(Avg('grade'))
+
+	return render_to_response('QCM/user_profile.html', {'quizz' : quizz, 'grade' : grade})
+
+

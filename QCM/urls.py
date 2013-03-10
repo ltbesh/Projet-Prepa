@@ -10,7 +10,7 @@ urlpatterns = patterns('',
     url(r'end/$', 'QCM.views.end_quizz', name = 'QCM_end_quizz'),
 
     #FIX ME : User profile can not be in the question app
-    url(r'account/$', 'QCM.views.display_user_profile', name = 'display_user_profile'),
+    url(r'account/$', 'QCM.views.display_user_profile', name = 'user_profile'),
 
 )
 

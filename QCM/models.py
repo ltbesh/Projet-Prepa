@@ -62,24 +62,26 @@ class Quizz(models.Model):
 	user = models.ForeignKey(User)
 	date_started = models.DateTimeField('date started')
 	questions = models.ManyToManyField(Question)
-	
+	grade = models.IntegerField(default = 0)
+
 	@classmethod
 	def new(cls,use):
 		struct=time.localtime()
-		quizz=cls(user=use,date_started=datetime.fromtimestamp(mktime(struct)))
+		quizz=cls(user = use,date_started = datetime.fromtimestamp(mktime(struct)))
 		return quizz
 		
 	def append(self,chap,subj,lev,number=10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
 		question_list = Question.objects.all().filter(chapter=chap,subject=subj,level=lev)
-		newlist=[]
+		newlist = []
 		for question in question_list:
 			newlist.append(question)
 		random.shuffle(newlist)
-		newlist=newlist[0:int(number)-1]
+		newlist = newlist[0:int(number)-1]
 		for question in newlist:
 			self.questions.add(question)
+
 	def __unicode__ (self):
-			return str(self.user)+"--"+str(self.date_started)
+			return str(self.user) + "--" + str(self.date_started)
 			
 		
 class Answer(models.Model):
@@ -90,7 +92,6 @@ class Answer(models.Model):
 	def __unicode__ (self):
 		return self.answer
 
-#FIXME: MK: Not needed? 
 class Guess(models.Model):
 	quizz = models.ForeignKey(Quizz)
 	answer = models.ForeignKey(Answer)
