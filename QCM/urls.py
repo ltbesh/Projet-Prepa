@@ -6,7 +6,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'selection/$', 'QCM.views.question_selection', name = 'QCM_selection'),
-    url(r'start/$', 'QCM.views.start_quizz', name = 'QCM_start_quizz'),
+    url(r'start/$', 'QCM.views.answer_question', name = 'QCM_answer_question'),
     url(r'end/$', 'QCM.views.end_quizz', name = 'QCM_end_quizz'),
 
     #FIX ME : User profile can not be in the question app
