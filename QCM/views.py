@@ -5,7 +5,7 @@ from random import randint
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
-import datetime, random, sha
+import datetime, random, sha, sys
 from django.shortcuts import render_to_response, get_object_or_404, render
 from django.core.mail import send_mail
 from QCM.models import UserProfile, Quizz, Question, Answer, Guess
@@ -17,7 +17,7 @@ from django.shortcuts import redirect
 
 @login_required()
 def index(request):
-	return render_to_response('QCM/index.html', {'question_list':question_list}, context_instance=RequestContext(request))	
+	return render_to_response('QCM/index.html', context_instance=RequestContext(request))	
 
 # Display the form for initializing MCQ so that user create its MCQ based on chosen options
 @login_required()
@@ -29,7 +29,6 @@ def question_selection(request):
             quizz.save()
             quizz.append()
             quizz.save()
-            #deplacer le make quizz ici
             request.session['quizz']=quizz
             return HttpResponseRedirect('question/start') # Redirect after POST
     else:
@@ -37,75 +36,78 @@ def question_selection(request):
 		form = QuestionSelectionForm()	
 		return render_to_response('QCM/questionselection.html',{'form': form},context_instance=RequestContext(request))
 
-question_list=[]
-i=0
-quizz=0
-
 
 @login_required()
 def start_quizz(request):
-
-	def make_quizz():
-		global i
-		global question_list
-		global quizz
-		i=0
-		quizz=Quizz.objects.all()
-		quizzlist=[]
-		for quizzz in quizz:
-			quizzlist.append(quizzz)
-		global quizz
-		quizz=quizzlist[-1] # load the last quizz #FIXME: make the question_selection view pass the quizz instead of retrieving it this way to avoid DB mayhem?
-		questions=quizz.questions.all()
-		global question_list
-		question_list=[]
-		for question in questions:
-			global question_list
-			question_list.append(question)
-		return question_list
 		
 	if request.method == 'POST': 
 	
-		ans = request.POST["answer"]
-		ans = Answer.objects.all().filter(question=question_list[i].id, answer=ans)
-		ans = ans[0]
 		quizz = request.session['quizz']
-		guess = Guess.new(quizz,ans) #quizz & answer sont des foreignkey
-		guess.save()
+		ans = request.POST["answer"]
 		
-		global question_list
-		global i
-		if i<len(question_list)-1:
-			global i
-			i=i+1
-			quest=question_list[i]
+		ans = Answer.objects.all().filter(answer=ans, question=request.session['question'])
+		ans = ans[0]
+		
+		guess = Guess.new(quizz,ans) 
+		guess.save()
+		question_list=Question.objects.filter(quizz=quizz)
+		guess_list=Guess.objects.filter(quizz=quizz)
+		
+		q_l=[]
+		for q in question_list:
+			q_l.append(q)
+		question_list=q_l
+		
+		for g in guess_list:
+			question_list.remove(g.answer.question)
+		random.shuffle(question_list)
+		
+		try: 
+			request.session['question']=question_list[0]
 			answerlist=[]
-			for answer in Answer.objects.all().filter(question=quest.id):
+			for answer in Answer.objects.filter(question = request.session['question']):
 				answerlist.append(answer)
 			random.shuffle(answerlist)
+			return render_to_response('QCM/start_quizz.html',{'answers':answerlist, 'question':request.session['question']},context_instance = RequestContext(request))
 			
-			return render_to_response('QCM/start_quizz.html',{'answers':answerlist, 'question':quest},context_instance = RequestContext(request))
+		except:
 			
-		else:
 			return HttpResponseRedirect('question/end')
 
 	else:
 		
-		question_list=make_quizz()
-		quest=question_list[0]
-		answerlist=[]
-		for answer in Answer.objects.all().filter(question = quest.id):
-			answerlist.append(answer)
+		quizz = request.session['quizz']
 		
-		random.shuffle(answerlist)
+		question_list=Question.objects.filter(quizz=quizz)
+		guess_list=Guess.objects.filter(quizz=quizz)
 		
-		return render_to_response('QCM/start_quizz.html',{'answers':answerlist, 'question':quest},context_instance = RequestContext(request))
+		q_l=[]
+		for q in question_list:
+			q_l.append(q)
+		question_list=q_l
+		
+		for g in guess_list:
+			question_list.remove(g.answer.question)
+		random.shuffle(question_list)
+		
+		try: 
+			request.session['question']=question_list[0]
+			answerlist=[]
+			for answer in Answer.objects.filter(question = request.session['question']):
+				answerlist.append(answer)
+			random.shuffle(answerlist)
+			return render_to_response('QCM/start_quizz.html',{'answers':answerlist, 'question':request.session['question']},context_instance = RequestContext(request))
+			
+		except:
+			print sys.exc_info()
+			return HttpResponseRedirect('question/end')
 
 @login_required()
 def end_quizz(request):
 	q = request.session['quizz']
 	guess_list = []
 	guess = Guess.objects.filter(quizz = q)
+	
 	print guess
 	note = 0
 	liste = []
@@ -129,6 +131,7 @@ def end_quizz(request):
 
 	try:
 		note_finale = (note / float(len(guess_list))) * 20.0
+		note_finale=round(note_finale, 1)
 	except:
 		pass
 	q.grade = note_finale
