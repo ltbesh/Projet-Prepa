@@ -14,6 +14,3 @@ class QuestionSelectionForm(forms.Form):
 	chapter = forms.ChoiceField(
 		choices = Chapter.objects.all().values_list(),
 		)
-	number = forms.ChoiceField(
-		choices = ((5 ,5),(10 ,10),(20 ,20),(100 ,100)), #proposer le max db?
-		)

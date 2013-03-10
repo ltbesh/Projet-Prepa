@@ -29,7 +29,6 @@ class Subject(models.Model):# Example : Mathematique, Physics, Chemistry ...
 	def __unicode__ (self):
 		return self.name
 
-
 class Level(models.Model):# Example : MPSI, PCSI ...
 	name = models.CharField(max_length = 200)
 
@@ -70,16 +69,19 @@ class Quizz(models.Model):
 	@classmethod
 	def new(cls,use):
 		struct=time.localtime()
-		quizz=cls(user = use,date_started = datetime.fromtimestamp(mktime(struct)))
+		quizz=cls(user = use, date_started = datetime.fromtimestamp(mktime(struct)))
 		return quizz
 		
-	def append(self,chap,subj,lev,number=10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
-		question_list = Question.objects.all().filter(chapter=chap,subject=subj,level=lev)
+	def append(self, chap, subj, lev, number = 2): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
+		question_list = Question.objects.all().filter(chapter = chap,subject = subj,level = lev)
 		newlist = []
+		self.level = Level.objects.filter(pk = lev)[0]
+		self.subject = Subject.objects.filter(pk = subj)[0]
+		self.chapter = Chapter.objects.filter(pk = chap)[0]
 		for question in question_list:
 			newlist.append(question)
 		random.shuffle(newlist)
-		newlist = newlist[0:int(number)-1]
+		newlist = newlist[0:int(number)]
 		for question in newlist:
 			self.questions.add(question)
 

@@ -1,23 +1,48 @@
 {% extends "base.html" %}
 {% load i18n %}
+
+
+
 {% block content %}
 
 
-<body>
+	<p>{% trans "Your average is"%} : {{grade}} / 20</p>
 
-<ul>
-	<p>
-		Votre moyene :  {{grade}} / 20
-	</p>
-	
-	{% for l in liste%}
-	<p>{{l.0}}</p>
-		<p>Votre réponse : {{l.1}}</p>
-		<p>La bonne réponse était : {{l.2}}</p>
+<form method="post" action=".">
+	{% csrf_token %}
+	{{ form.as_p }}
+
+  <input type="submit" value="{% trans 'Submit' %}" />
+</form>
+
+<table>	
+	<tr>	
+		<td> {% trans "Date"%} </td>
+		<td> {% trans "Level"%} </td>
+		<td> {% trans "Subject"%} </td>
+		<td> {% trans "Chapter"%} </td>
+		<td> {% trans "Grade"%} </td>
+		<td> {% trans "Detailled results"%} </td>
+	</tr>
+	{% for q in quizz%}
+	<tr>
+		<td> {{q.date_started}} </td>
+		<td> {{q.level}} </td>
+		<td> {{q.subject}} </td>
+		<td> {{q.chapter}} </td>
+		<td> {{q.grade}} </td>
+		<td> 
+		<form name = "results" method = "post" action = ".">
+		{% csrf_token %}
+			<input type = "hidden" name = "quizz_id" value = {{q.pk}} />
+			<a href = "javascript: document.forms['results'].submit();"> {% trans "Results" %} </a>
+		</form></td>
+	</tr>
 	{% endfor %}
+</table>
 
 
-</ul>
+
 </body>
 {% endblock %}
 

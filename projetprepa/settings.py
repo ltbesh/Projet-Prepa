@@ -173,7 +173,6 @@ DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
 }
 
-
 # Parse database configuration from $DATABASE_URL
 import dj_database_url
 DATABASES = {}
