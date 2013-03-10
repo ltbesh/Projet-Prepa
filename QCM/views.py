@@ -32,7 +32,7 @@ def question_selection(request):
     if request.method == 'POST': # If the form has been submitted...
         form = QuestionSelectionForm(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
-            quizz=Quizz.new(request.user)
+            quizz = Quizz.new(request.user)
             quizz.save()
             quizz.append(request.POST["chapter"],request.POST["subject"],request.POST["level"])
             quizz.save()
