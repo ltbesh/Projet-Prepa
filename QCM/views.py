@@ -17,7 +17,14 @@ from django.shortcuts import redirect
 
 @login_required()
 def index(request):
-	return render_to_response('QCM/index.html',context_instance=RequestContext(request))	
+	Questions = Question.objects.all()
+	question_list = []
+	for q in Questions:
+		question_list.append(q)
+
+
+
+	return render_to_response('QCM/index.html', {'question_list':question_list}, context_instance=RequestContext(request))	
 
 # Display the form for initializing MCQ so that user create its MCQ based on chosen options
 @login_required()
