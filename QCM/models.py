@@ -61,9 +61,9 @@ class Quizz(models.Model):
 	user = models.ForeignKey(User)
 	date_started = models.DateTimeField('date started')
 	questions = models.ManyToManyField(Question)
-	level = models.ForeignKey(Level)
-	subject = models.ForeignKey(Subject)
-	chapter = models.ForeignKey(Chapter)
+	level = models.ForeignKey(Level, null = True)
+	subject = models.ForeignKey(Subject, null = True)
+	chapter = models.ForeignKey(Chapter, null = True)
 	grade = models.IntegerField(default = 0)
 
 	@classmethod
