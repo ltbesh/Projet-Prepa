@@ -9,10 +9,10 @@
 		{{question}}
 	</p>
 
-	{% for a in answers%}
+	{% for answer in answers%}
 		<form  method="post" action=".">
 		{% csrf_token %}
-		<li><input type="submit" name= "answer"  value="{{ a }}" /></li>
+		<input class = "btn" type="submit" name= "answer"  value="{{ answer }}" />
 	{% endfor %}
 
 
