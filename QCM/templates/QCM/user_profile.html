@@ -6,16 +6,9 @@
 {% block content %}
 
 
-	<p>{% trans "Your average is"%} : {{grade}} / 20</p>
+	<h5>{% trans "Your average is"%} : {{grade}} / 20</h5>
 
-<form method="post" action=".">
-	{% csrf_token %}
-	{{ form.as_p }}
-
-  <input type="submit" value="{% trans 'Submit' %}" />
-</form>
-
-<table>	
+<table class = "table table-condensed">	
 	<tr>	
 		<td> {% trans "Date"%} </td>
 		<td> {% trans "Level"%} </td>
@@ -25,7 +18,11 @@
 		<td> {% trans "Detailled results"%} </td>
 	</tr>
 	{% for q in quizz%}
-	<tr>
+	{% if q.grade >= 10 %}
+	<tr class = "success">
+	{% else %}
+	<tr class = "error">
+	{% endif%}
 		<td> {{q.date_started}} </td>
 		<td> {{q.level}} </td>
 		<td> {{q.subject}} </td>
@@ -41,7 +38,12 @@
 	{% endfor %}
 </table>
 
+<form method="post" action=".">
+	{% csrf_token %}
+	{{ form.as_p }}
 
+  <input type="submit" value="{% trans 'Submit' %}" />
+</form>
 
 </body>
 {% endblock %}
