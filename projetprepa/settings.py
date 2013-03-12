@@ -76,14 +76,16 @@ ROOT_URLCONF = 'urls'
 WSGI_APPLICATION = 'projetprepa.wsgi.application'
 
 TEMPLATE_DIRS = (
-    'templates',
     'QCM/templates/QCM',
+    'registration/templates/registration'
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
 )
 
 INSTALLED_APPS = (
+    'QCM',
+    'registration',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -95,8 +97,6 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'debug_toolbar',
-    'QCM',
-    'registration',
     'south',
 )
 
