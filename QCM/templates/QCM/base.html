@@ -31,8 +31,8 @@
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
-          <a class="brand" href="/">Projet-Prepa</a>
             <ul class="nav">
+                  <li><a href="{% url index %}">{% trans 'Home' %}</a></li>
                 {% if user.is_authenticated %}
                   <li><a href="{% url QCM_selection %}">{% trans 'New Quizz' %}</a></li>
                   <li><a href="{% url user_profile %}">{% trans "Profile" %}</a></li>

@@ -2,35 +2,27 @@
 {% load i18n %}
 {% block content %}
 
-<head>
-  <meta charset="utf-8" />
-  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-  <script src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
-  <link rel="stylesheet" href="/resources/demos/style.css" />
-
-</head>
-<body>
-
-<ul>
-	<h1>
-		Résultat: {{note_finale}} / 20
-	</h1>
-	<HR NOSHADE>
+<ol>
+	<h5>
+		{% trans 'Your grade' %} : {{note_finale}} / 20
+	</h5>
 	{% for l in liste%}
 
-	<h2>{{l.0}}</h2>
+	<h6>{{l.0}}</h6>
 	{% if l.1 == l.2%}
-	<img src="http://www.actionreaction.fja.ab.ca/files/Checkmark.png" alt="Good job :)" width="60" height="60" />
-	{% else %}
-	<img src="http://images2.wikia.nocookie.net/__cb20081116141227/admintools/images/thumb/a/a2/X_mark.svg/525px-X_mark.svg.png" alt="Too bad :("  width="60" height="60"/>
+		<div class="alert alert-success">
+		<p>{% trans 'Your answer'%} : {{l.1}}</p>
+		{% else %}
+		<div class="alert alert-error">
+		<p>{% trans 'Your answer'%} : {{l.1}}</p>
+		<p>{% trans 'The correct answer was'%} : {{l.2}}</p>
 	{% endif %}
-		<h3>Votre réponse : {{l.1}}</h3>
-		<h3>La bonne réponse était : {{l.2}}</h3>
-	<HR NOSHADE>
+
+	</div>
 	{% endfor %}
 
 
-</ul>
-</body>
+   
+</ol>
 {% endblock %}
 
