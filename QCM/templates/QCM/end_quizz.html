@@ -11,11 +11,11 @@
 	<h6>{{l.0}}</h6>
 	{% if l.1 == l.2%}
 		<div class="alert alert-success">
-		<p>{% trans 'Your answer'%} : {{l.1}}</p>
+		{% trans 'Your answer'%} : {{l.1}}
 		{% else %}
 		<div class="alert alert-error">
-		<p>{% trans 'Your answer'%} : {{l.1}}</p>
-		<p>{% trans 'The correct answer was'%} : {{l.2}}</p>
+		{% trans 'Your answer'%} : {{l.1}}</br>
+		{% trans 'The correct answer was'%} : {{l.2}}
 	{% endif %}
 	</div>
 	{% endfor %}

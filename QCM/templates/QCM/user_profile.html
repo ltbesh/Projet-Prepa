@@ -7,42 +7,44 @@
 
 
 	<h5>{% trans "Your average is"%} : {{grade}} / 20</h5>
-
-<table class = "table table-condensed">	
-	<tr>	
-		<td> {% trans "Date"%} </td>
-		<td> {% trans "Level"%} </td>
-		<td> {% trans "Subject"%} </td>
-		<td> {% trans "Chapter"%} </td>
-		<td> {% trans "Grade"%} </td>
-		<td> {% trans "Detailled results"%} </td>
-	</tr>
-	{% for q in quizz%}
-	{% if q.grade >= 10 %}
-	<tr class = "success">
-	{% else %}
-	<tr class = "error">
-	{% endif%}
-		<td> {{q.date_started}} </td>
-		<td> {{q.level}} </td>
-		<td> {{q.subject}} </td>
-		<td> {{q.chapter}} </td>
-		<td> {{q.grade}} </td>
-		<td> 
-		<form name = "results" method = "post" action = ".">
-		{% csrf_token %}
-			<input type = "hidden" name = "quizz_id" value = {{q.pk}} />
-			<a href = "javascript: document.forms['results'].submit();"> {% trans "Results" %} </a>
-		</form></td>
-	</tr>
-	{% endfor %}
-</table>
-
+<div class="row">
+	<div class="span4">
+		<table class = "table">	
+			<tr>	
+				<td> {% trans "Date"%} </td>
+				<td> {% trans "Level"%} </td>
+				<td> {% trans "Subject"%} </td>
+				<td> {% trans "Chapter"%} </td>
+				<td> {% trans "Grade"%} </td>
+				<td> {% trans "Detailled results"%} </td>
+			</tr>
+			{% for q in quizz%}
+				{% if q.grade >= 10 %}
+				<tr class = "success">
+				{% else %}
+				<tr class = "error">
+				{% endif%}
+					<td> {{ q.date_started|date:"d/n/y"|lower }} </td>
+					<td> {{q.level}} </td>
+					<td> {{q.subject}} </td>
+					<td>{{q.chapter}}</td>
+					<td> {{q.grade}} </td>
+					<td>
+						<form name = "results" method = "post" action = ".">
+						{% csrf_token %}
+							<input type = "hidden" name = "quizz_id" value = {{q.pk}} />
+							<a href = "javascript: document.forms['results'].submit();">{% trans "Results" %}</a>
+						</form>
+					</td>
+				</tr>
+			{% endfor %}
+		</table>
+	</div>
+</div>
 <form method="post" action=".">
 	{% csrf_token %}
 	{{ form.as_p }}
-
-  <input type="submit" value="{% trans 'Submit' %}" />
+	<input type="submit" value="{% trans 'Submit' %}" />
 </form>
 
 </body>
