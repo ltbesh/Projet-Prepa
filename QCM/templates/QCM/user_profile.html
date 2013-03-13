@@ -19,28 +19,29 @@
 				<td> {% trans "Detailled results"%} </td>
 			</tr>
 			{% for q in quizz%}
-				{% if q.grade >= 10 %}
-				<tr class = "success">
-				{% else %}
-				<tr class = "error">
-				{% endif%}
-					<td> {{ q.date_started|date:"d/n/y"|lower }} </td>
-					<td> {{q.level}} </td>
-					<td> {{q.subject}} </td>
-					<td>{{q.chapter}}</td>
-					<td> {{q.grade}} </td>
-					<td>
-						<form name = "results" method = "post" action = ".">
-						{% csrf_token %}
-							<input type = "hidden" name = "quizz_id" value = {{q.pk}} />
-							<a href = "javascript: document.forms['results'].submit();">{% trans "Results" %}</a>
-						</form>
-					</td>
-				</tr>
+			{% if q.grade >= 10 %}
+			<tr class = "success">
+			{% else %}
+			<tr class = "error">
+			{% endif%}
+				<td> {{ q.date_started|date:"d/n/y"|lower }} </td>
+				<td> {{q.level}} </td>
+				<td> {{q.subject}} </td>
+				<td>{{q.chapter}}</td>
+				<td> {{q.grade}} </td>
+				<td>
+					<form style="margin-bottom: 0" name = "results" method = "post" action = ".">
+					{% csrf_token %}
+						<input type = "hidden" name = "quizz_id" value = {{q.pk}} />
+					</form>
+						<a href = "javascript: document.forms['results'].submit();">{% trans "Results" %}</a>
+				</td>
+			</tr>
 			{% endfor %}
 		</table>
 	</div>
 </div>
+
 <form method="post" action=".">
 	{% csrf_token %}
 	{{ form.as_p }}
