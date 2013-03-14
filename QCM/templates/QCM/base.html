@@ -27,7 +27,8 @@
 {% load i18n %}
 
  <body>
-
+  
+    {% block navigation %}
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
@@ -53,6 +54,7 @@
         </div>
       </div>
     </div>
+    {% endblock navigation %}
 
 
     {% block messages %}

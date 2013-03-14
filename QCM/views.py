@@ -104,7 +104,7 @@ def end_quizz(request):
 		note_finale = (note / float(len(guess_list))) * 20.0
 		note_finale = round(note_finale, 1)
 	except:
-		note_fina
+		note_finale = 0
 	q.grade = note_finale
 	q.save()
 	return render_to_response('QCM/end_quizz.html',{'note_finale' : note_finale, 'liste' : liste}, context_instance = RequestContext(request))

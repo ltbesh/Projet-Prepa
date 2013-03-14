@@ -4,43 +4,37 @@
 
 
 {% block content %}
+<h5>{% trans "Your average is"%} : {{grade}} / 20</h5>
 
+<table class = "table table-condensed">	
+	<tr>	
+		<td> {% trans "Date"%} </td>
+		<td> {% trans "Quizz type"%} </td>
+		<td> {% trans "Grade"%} </td>
+	</tr>
+	{% for q in quizz%}
+	{% if q.grade >= 10 %}
+	<tr class = "success">
+	{% else %}
+	<tr class = "error">
+	{% endif%}
+		<td style="vertical-align:middle"> {{ q.date_started|date:"d/n/y"|lower }} </td>
+		<td font-size = 12 px> 
+			{{q.level}}</br>
+			{{q.subject}}</br>
+			{{q.chapter}}</br>
+		</td>
+		<td style="vertical-align:middle">
+			<form style="margin-bottom: 0" name = "results" method = "post" action = ".">
+			{% csrf_token %}
+				<input type = "hidden" name = "quizz_id" value = {{q.pk}} />
+			</form>
+				<a class= "btn"href = "javascript: document.forms['results'].submit();">{{q.grade}}</a>
+		</td>
+	</tr>
+	{% endfor %}
+</table>
 
-	<h5>{% trans "Your average is"%} : {{grade}} / 20</h5>
-<div class="row">
-	<div class="span4">
-		<table class = "table">	
-			<tr>	
-				<td> {% trans "Date"%} </td>
-				<td> {% trans "Level"%} </td>
-				<td> {% trans "Subject"%} </td>
-				<td> {% trans "Chapter"%} </td>
-				<td> {% trans "Grade"%} </td>
-				<td> {% trans "Detailled results"%} </td>
-			</tr>
-			{% for q in quizz%}
-			{% if q.grade >= 10 %}
-			<tr class = "success">
-			{% else %}
-			<tr class = "error">
-			{% endif%}
-				<td> {{ q.date_started|date:"d/n/y"|lower }} </td>
-				<td> {{q.level}} </td>
-				<td> {{q.subject}} </td>
-				<td>{{q.chapter}}</td>
-				<td> {{q.grade}} </td>
-				<td>
-					<form style="margin-bottom: 0" name = "results" method = "post" action = ".">
-					{% csrf_token %}
-						<input type = "hidden" name = "quizz_id" value = {{q.pk}} />
-					</form>
-						<a href = "javascript: document.forms['results'].submit();">{% trans "Results" %}</a>
-				</td>
-			</tr>
-			{% endfor %}
-		</table>
-	</div>
-</div>
 
 <form method="post" action=".">
 	{% csrf_token %}

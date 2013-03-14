@@ -4,18 +4,18 @@
 {% block content %}
 
 
-<ul>
-	<p>
+	<div class = "well well-small">
 		{{question}}
-	</p>
-
+	</div>
+<ol>
 	{% for answer in answers%}
-		<form  method="post" action=".">
-		{% csrf_token %}
-		<input class = "btn" type="submit" name= "answer"  value="{{ answer }}" />
+		<li>
+			<form  method="post" action=".">
+			{% csrf_token %}
+			<input class = "btn" type="submit" name= "answer"  value="{{ answer }}" />
+		</li>
 	{% endfor %}
 
-
-</ul>
+</ol>
 {% endblock %}
 
