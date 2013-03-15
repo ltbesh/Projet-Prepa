@@ -8,7 +8,7 @@ from django.contrib.auth.forms import UserCreationForm
 import datetime, random, sha, sys
 from django.shortcuts import render_to_response, get_object_or_404, render
 from django.core.mail import send_mail
-from QCM.models import UserProfile, Quizz, Question, Answer, Guess
+from QCM.models import UserProfile, Quizz, Question, Answer, Guess, News
 from QCM.forms import QuestionSelectionForm
 from django.db.models import Avg
 from django.shortcuts import redirect
@@ -17,7 +17,8 @@ from django.shortcuts import redirect
 
 @login_required()
 def index(request):
-	return render_to_response('QCM/index.html', context_instance=RequestContext(request))	
+	news = News.objects.all()[0:10]
+	return render_to_response('QCM/index.html', {'news' : news}, context_instance=RequestContext(request))	
 
 # Display the form for initializing MCQ so that user create its MCQ based on chosen options
 @login_required()

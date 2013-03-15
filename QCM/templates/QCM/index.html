@@ -3,7 +3,10 @@
 
 {% block content %}
 
-
+{% for new in news%}
+          <h2>{{new.title}}</h2>
+          <p>{{new.content}}</p>
+{% endfor %}
 
 
 {% endblock %}

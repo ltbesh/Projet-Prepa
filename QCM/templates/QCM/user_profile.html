@@ -7,7 +7,7 @@
 <h5>{% trans "Your average is"%} : {{grade}} / 20</h5>
 
 <table class = "table table-condensed">	
-	<tr>	
+	<tr>	Ò
 		<td> {% trans "Date"%} </td>
 		<td> {% trans "Quizz type"%} </td>
 		<td> {% trans "Grade"%} </td>
@@ -19,22 +19,21 @@
 	<tr class = "error">
 	{% endif%}
 		<td style="vertical-align:middle"> {{ q.date_started|date:"d/n/y"|lower }} </td>
-		<td font-size = 12 px> 
+		<td> 
 			{{q.level}}</br>
 			{{q.subject}}</br>
 			{{q.chapter}}</br>
 		</td>
-		<td style="vertical-align:middle">
+		<td style="vertical-align:middle">	
 			<form style="margin-bottom: 0" name = "results" method = "post" action = ".">
 			{% csrf_token %}
 				<input type = "hidden" name = "quizz_id" value = {{q.pk}} />
+				<input class = "btn" type="submit" name= "quizz"  value="{{ q.grade }}" />
 			</form>
-				<a class= "btn"href = "javascript: document.forms['results'].submit();">{{q.grade}}</a>
 		</td>
 	</tr>
 	{% endfor %}
 </table>
-
 
 <form method="post" action=".">
 	{% csrf_token %}

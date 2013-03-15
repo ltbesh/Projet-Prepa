@@ -101,13 +101,18 @@ class Guess(models.Model):
 	quizz = models.ForeignKey(Quizz)
 	answer = models.ForeignKey(Answer)
 	answer_date = models.DateTimeField('date answered')
+
 	@classmethod
 	def new(cls,use,ans):
 		struct=time.localtime()
 		quizz=cls(quizz=use,answer=ans,answer_date=datetime.fromtimestamp(mktime(struct)))
 		return quizz
 
-
+class News(models.Model):
+	author  = models.ForeignKey(User)
+	date_created = models.DateTimeField()
+	title = models.CharField(max_length = 200)
+	content = models.TextField()
 
 #class Temporary_Questions(models.Model): # inherit from question, has comments from admin and moderators in addition to questions fields
 	
