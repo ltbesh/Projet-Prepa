@@ -111,8 +111,8 @@ class Guess(models.Model):
 class News(models.Model):
 	author  = models.ForeignKey(User)
 	date_created = models.DateTimeField()
+	title = models.CharField(max_length = 200)
 	content = models.TextField()
-	number = models.IntegerField()
 
 #class Temporary_Questions(models.Model): # inherit from question, has comments from admin and moderators in addition to questions fields
 	
