@@ -17,7 +17,7 @@ from django.shortcuts import redirect
 
 @login_required()
 def index(request):
-	news = News.objects.all()[0:10]
+	news = News.objects.all().order_by('date_created')[0:10]
 	return render_to_response('QCM/index.html', {'news' : news}, context_instance=RequestContext(request))	
 
 # Display the form for initializing MCQ so that user create its MCQ based on chosen options
@@ -113,7 +113,7 @@ def end_quizz(request):
 @login_required
 def display_user_profile(request):
 
-	quizz = Quizz.objects.filter(user = request.user)
+	quizz = Quizz.objects.filter(user = request.user).order_by('-date_started')
 	form = QuestionSelectionForm()
 
 	if request.method == 'POST':

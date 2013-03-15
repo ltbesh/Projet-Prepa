@@ -18,7 +18,11 @@
 	{% else %}
 	<tr class = "error">
 	{% endif%}
-		<td style="vertical-align:middle"> {{ q.date_started|date:"d/n/y"|lower }} </td>
+		<td style="vertical-align:middle"> 
+			{{ q.date_started|date:"d/n/y"|lower }} </br>
+			{{ q.date_started|date:"H:i"|lower}}
+
+		</td>
 		<td> 
 			{{q.level}}</br>
 			{{q.subject}}</br>
