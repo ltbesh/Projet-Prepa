@@ -92,7 +92,7 @@ def activate(request, backend,
                               context_instance=context)
 
 
-def register(request, backend, success_url=None, form_class=None,
+def register(request, backend, success_url="/", form_class=None,
              disallowed_url='registration_disallowed',
              template_name='registration/registration_form.html',
              extra_context=None):

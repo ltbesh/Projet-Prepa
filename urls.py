@@ -6,7 +6,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
 	url(r'^$', 'QCM.views.index', name='index'),
-    url(r'^accounts/', include('registration.backends.default.urls')),
+    url(r'^accounts/', include('registration.backends.simple.urls')),
     url(r'^question/', include('QCM.urls')),
 
     # Uncomment th admin/doc line below to enable admin documentation:
