@@ -17,8 +17,8 @@ from django.shortcuts import redirect
 
 @login_required()
 def index(request):
-	news = News.objects.all().order_by('date_created')[0:10]
-	return render_to_response('QCM/index.html', {'news' : news}, context_instance=RequestContext(request))	
+    news = News.objects.all().order_by('date_created')[0:10]
+    return render_to_response('QCM/index.html', {'news' : news}, context_instance=RequestContext(request))  
 
 # Display the form for initializing MCQ so that user create its MCQ based on chosen options
 @login_required()
@@ -33,107 +33,103 @@ def question_selection(request):
             request.session['quizz'] = quizz
             return redirect('QCM_answer_question') # Redirect after POST
     else:
-		form = QuestionSelectionForm()	
-		return render_to_response('QCM/questionselection.html',{'form': form},context_instance=RequestContext(request))
+        form = QuestionSelectionForm()  
+        return render_to_response('QCM/questionselection.html',{'form': form},context_instance=RequestContext(request))
 
 
 @login_required()
 def answer_question(request):
-	
-	quizz = request.session['quizz']
+    
+    quizz = request.session['quizz']
 
-	if request.method == 'POST': 
-		answer = request.POST["answer"]
-		answer = get_object_or_404(Answer,answer = answer, question = request.session['question'])
-		guess = Guess.new(quizz,answer) 
-		guess.save()
+    if request.method == 'POST': 
+        answer = get_object_or_404(Answer,answer = request.POST["answer"], question = request.session['question'])
+        guess = Guess.new(quizz,answer) 
+        guess.save()
 
-	question_request = Question.objects.filter(quizz = quizz)
-	guess_request = Guess.objects.filter(quizz = quizz)
+    question_request = Question.objects.filter(quizz = quizz)
+    guess_request = Guess.objects.filter(quizz = quizz)
 
-	question_list = []
-	for q in question_request:
-		question_list.append(q)
-	
-	for g in guess_request:
-		question_list.remove(g.answer.question)
-	random.shuffle(question_list)
+    question_list = []
+    for q in question_request:
+        question_list.append(q)
+    
+    for g in guess_request:
+        question_list.remove(g.answer.question)
+    random.shuffle(question_list)
 
-	try: 
-		request.session['question'] = question_list[0]
-	except:
-		return redirect('QCM_end_quizz')
+    try: 
+        request.session['question'] = question_list[0]
+    except:
+        return redirect('QCM_end_quizz')
 
-	answer_list = []
-	for answer in Answer.objects.filter(question = request.session['question']):
-		answer_list.append(answer)
-	random.shuffle(answer_list)
-
-	return render_to_response('QCM/start_quizz.html',{
-		'answers':answer_list, 
-		'question':request.session['question']
-		},context_instance = RequestContext(request))
-			
+    answer_list = Answer.objects.filter(question = request.session['question']).order_by('?')
+    
+    return render_to_response('QCM/start_quizz.html',{
+        'answers':answer_list, 
+        'question':request.session['question']
+        },context_instance = RequestContext(request))
+            
 
 @login_required()
 def end_quizz(request):
-	q = request.session['quizz']
-	guess_list = []
-	guess = Guess.objects.filter(quizz = q)
-	
-	note = 0
-	liste = []
-	
-	for g in guess:
-		liste2 = []
-		guess_list.append(g)
-		liste2.append(g.answer.question)
-		liste2.append(g.answer)
-		if g.answer.validity:
-			note = note + 1
-			liste2.append(g.answer)
-		else:
-			plop = Answer.objects.filter(question = g.answer.question, validity = 1)
-			try:
-				liste2.append(plop[0])
-			except IndexError , e:
-				liste2.append("Il n'y avait pas de bonne reponse")
-				
-		liste.append(liste2)
+    q = request.session['quizz']
+    guess_list = []
+    guess = Guess.objects.filter(quizz = q)
+    
+    note = 0
+    liste = []
+    
+    for g in guess:
+        liste2 = []
+        guess_list.append(g)
+        liste2.append(g.answer.question)
+        liste2.append(g.answer)
+        if g.answer.validity:
+            note = note + 1
+            liste2.append(g.answer)
+        else:
+            plop = Answer.objects.filter(question = g.answer.question, validity = 1)
+            try:
+                liste2.append(plop[0])
+            except IndexError , e:
+                liste2.append("Il n'y avait pas de bonne reponse")
 
-	try:
-		note_finale = (note / float(len(guess_list))) * 20.0
-		note_finale = round(note_finale, 1)
-	except:
-		note_finale = 0
-	q.grade = note_finale
-	q.save()
-	return render_to_response('QCM/end_quizz.html',{'note_finale' : note_finale, 'liste' : liste}, context_instance = RequestContext(request))
+        liste.append(liste2)
+
+    try:
+        note_finale = (note / float(len(guess_list))) * 20.0
+        note_finale = round(note_finale, 1)
+    except:
+        note_finale = 0
+    q.grade = note_finale
+    q.save()
+    return render_to_response('QCM/end_quizz.html',{'note_finale' : note_finale, 'liste' : liste}, context_instance = RequestContext(request))
 
 @login_required
 def display_user_profile(request):
 
-	quizz = Quizz.objects.filter(user = request.user).order_by('-date_started')
-	form = QuestionSelectionForm()
+    quizz = Quizz.objects.filter(user = request.user).order_by('-date_started')
+    form = QuestionSelectionForm()
 
-	if request.method == 'POST':
-		if 'quizz_id' in request.POST:
-			quizz = get_object_or_404(Quizz, pk = request.POST['quizz_id'])
-			request.session['quizz'] = quizz
-			return redirect('QCM_end_quizz')
+    if request.method == 'POST':
+        if 'quizz_id' in request.POST:
+            quizz = get_object_or_404(Quizz, pk = request.POST['quizz_id'])
+            request.session['quizz'] = quizz
+            return redirect('QCM_end_quizz')
 
-		quizz = quizz.filter(
-			level = request.POST['level'], 
-			subject = request.POST['subject'], 
-			chapter = request.POST['chapter'])
-		form = QuestionSelectionForm(request.POST)
+        quizz = quizz.filter(
+            level = request.POST['level'], 
+            subject = request.POST['subject'], 
+            chapter = request.POST['chapter'])
+        form = QuestionSelectionForm(request.POST)
 
-	grade = quizz.aggregate(Avg('grade'))["grade__avg"]
+    grade = quizz.aggregate(Avg('grade'))["grade__avg"]
 
-	return render_to_response('QCM/user_profile.html', {
-		'form' : form,
-		'quizz' : quizz,
-		'grade' : grade
-	}, context_instance = RequestContext(request))
+    return render_to_response('QCM/user_profile.html', {
+        'form' : form,
+        'quizz' : quizz,
+        'grade' : grade
+    }, context_instance = RequestContext(request))
 
 

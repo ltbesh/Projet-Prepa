@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 import time
 from time import mktime
 from datetime import datetime
+from django.shortcuts import get_object_or_404
 
 class UserProfile(models.Model): #Used for registration
 	user = models.OneToOneField(User)
@@ -42,6 +43,7 @@ class Question(models.Model):
 		return self.question
 
 class Quizz(models.Model):
+
 	user = models.ForeignKey(User)
 	date_started = models.DateTimeField('date started')
 	questions = models.ManyToManyField(Question)
@@ -51,22 +53,17 @@ class Quizz(models.Model):
 	grade = models.IntegerField(default = 0)
 
 	@classmethod
-	def new(cls,use, chap, subj, lev, number = 10):
+	def new(cls,user, chapter, subject, level):
 		struct=time.localtime()
-		level = Level.objects.filter(pk = lev)[0]
-		subject = Subject.objects.filter(pk = subj)[0]
-		chapter = Chapter.objects.filter(pk = chap)[0]
-		quizz=cls(user = use, level = level, subject = subject, chapter = chapter, date_started = datetime.fromtimestamp(mktime(struct)))
+		level = get_object_or_404(Level, pk = level)
+		subject = get_object_or_404(Subject, pk = subject)
+		chapter = get_object_or_404(Chapter, pk = chapter)
+		quizz=cls(user = user, level = level, subject = subject, chapter = chapter, date_started = datetime.fromtimestamp(mktime(struct)))
 		return quizz
 		
 	def append(self, number = 10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
-		question_list = Question.objects.all().filter(chapter = self.chapter, subject = self.subject,level = self.level)
-		newlist = []
+		question_list = Question.objects.filter(chapter = self.chapter, subject = self.subject,level = self.level).order_by('?')[0:number]
 		for question in question_list:
-			newlist.append(question)
-		random.shuffle(newlist)
-		newlist = newlist[0:int(number)]
-		for question in newlist:
 			self.questions.add(question)
 
 	def __unicode__ (self):
