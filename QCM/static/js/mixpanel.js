@@ -1,0 +1,1 @@
+mixpanel.track("Create Quizz");
