@@ -11,18 +11,6 @@ class UserProfile(models.Model): #Used for registration
 	activation_key = models.CharField(max_length = 40)
 	key_expires = models.DateTimeField()
 	
-#FIXME:MK: can we merge UserProfile & PlayerProfile?
-
-#~ class PlayerProfile(models.Model): #Our custom User. OneToOneField/ForeignKey relationship with User
-	#~ user = models.OneToOneField(User) #Or ForeignKey ?
-	#~ current_quizz = models.OneToOneField(Quizz) #Can be empty: to retrieve un-finished quizz
-	#~ #level = models.CharField() #Player Level (Terminale S, MPSI, MedecineP1...)
-	#~ #school = models.CharField() #OneToOne avec Lycee? 
-	#~ #contributor = models.BooleanField() #0=NO 1=YES
-	#~ # stats = ???
-	#~ quizz = models.ManyToManyField(Quizz) #list of requested quizz : FIXME: MK: Not needed?
-
-
 class Subject(models.Model):# Example : Mathematique, Physics, Chemistry ...
 	name = models.CharField(max_length = 200)
 
@@ -41,10 +29,6 @@ class Chapter(models.Model):# Example : Calculus, algebra ...
 	
 	def __unicode__ (self):
 		return self.name
-
-#FIX ME
-#FIX ME LTB: Should we put the id of the correct answer instead of the boolean fiels validity in the answer model ??? 
-#FIX ME MK: Nope? It is easier to do tests with booleans?
 
 class Question(models.Model):
 	level = models.ForeignKey(Level)

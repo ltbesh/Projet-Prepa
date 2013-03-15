@@ -12,7 +12,7 @@
 		<li>
 			<form  method="post" action=".">
 			{% csrf_token %}
-			<input class = "btn" type="submit" name= "answer"  value="{{ answer }}" />
+			<input class = "btn" type="submit" name= answer value="{{ answer }}" />
 			</form>
 		</li>
 	{% endfor %}
