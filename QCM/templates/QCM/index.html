@@ -4,8 +4,8 @@
 {% block content %}
 
 {% for new in news%}
-          <h2>{{new.title}}</h2>
-          <p>{{new.content}}</p>
+          <h4>{{new.title}}</h4>
+          <p>{{new.content|linebreaks}}</p>
 {% endfor %}
 
 
