@@ -49,6 +49,26 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('QCM', ['Question'])
 
+        # Adding model 'Quizz'
+        db.create_table('QCM_quizz', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('date_started', self.gf('django.db.models.fields.DateTimeField')()),
+            ('level', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Level'], null=True)),
+            ('subject', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Subject'], null=True)),
+            ('chapter', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Chapter'], null=True)),
+            ('grade', self.gf('django.db.models.fields.IntegerField')(default=0)),
+        ))
+        db.send_create_signal('QCM', ['Quizz'])
+
+        # Adding M2M table for field questions on 'Quizz'
+        db.create_table('QCM_quizz_questions', (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('quizz', models.ForeignKey(orm['QCM.quizz'], null=False)),
+            ('question', models.ForeignKey(orm['QCM.question'], null=False))
+        ))
+        db.create_unique('QCM_quizz_questions', ['quizz_id', 'question_id'])
+
         # Adding model 'Answer'
         db.create_table('QCM_answer', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -61,11 +81,21 @@ class Migration(SchemaMigration):
         # Adding model 'Guess'
         db.create_table('QCM_guess', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('quizz', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Quizz'])),
             ('answer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Answer'])),
             ('answer_date', self.gf('django.db.models.fields.DateTimeField')()),
         ))
         db.send_create_signal('QCM', ['Guess'])
+
+        # Adding model 'News'
+        db.create_table('QCM_news', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('author', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('date_created', self.gf('django.db.models.fields.DateTimeField')()),
+            ('title', self.gf('django.db.models.fields.CharField')(max_length=200)),
+            ('content', self.gf('django.db.models.fields.TextField')()),
+        ))
+        db.send_create_signal('QCM', ['News'])
 
 
     def backwards(self, orm):
@@ -84,11 +114,20 @@ class Migration(SchemaMigration):
         # Deleting model 'Question'
         db.delete_table('QCM_question')
 
+        # Deleting model 'Quizz'
+        db.delete_table('QCM_quizz')
+
+        # Removing M2M table for field questions on 'Quizz'
+        db.delete_table('QCM_quizz_questions')
+
         # Deleting model 'Answer'
         db.delete_table('QCM_answer')
 
         # Deleting model 'Guess'
         db.delete_table('QCM_guess')
+
+        # Deleting model 'News'
+        db.delete_table('QCM_news')
 
 
     models = {
@@ -109,12 +148,20 @@ class Migration(SchemaMigration):
             'answer': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Answer']"}),
             'answer_date': ('django.db.models.fields.DateTimeField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+            'quizz': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Quizz']"})
         },
         'QCM.level': {
             'Meta': {'object_name': 'Level'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'})
+        },
+        'QCM.news': {
+            'Meta': {'object_name': 'News'},
+            'author': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"}),
+            'content': ('django.db.models.fields.TextField', [], {}),
+            'date_created': ('django.db.models.fields.DateTimeField', [], {}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '200'})
         },
         'QCM.question': {
             'Meta': {'object_name': 'Question'},
@@ -124,6 +171,17 @@ class Migration(SchemaMigration):
             'pub_date': ('django.db.models.fields.DateTimeField', [], {}),
             'question': ('django.db.models.fields.CharField', [], {'max_length': '2000'}),
             'subject': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Subject']"})
+        },
+        'QCM.quizz': {
+            'Meta': {'object_name': 'Quizz'},
+            'chapter': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Chapter']", 'null': 'True'}),
+            'date_started': ('django.db.models.fields.DateTimeField', [], {}),
+            'grade': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'level': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Level']", 'null': 'True'}),
+            'questions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['QCM.Question']", 'symmetrical': 'False'}),
+            'subject': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Subject']", 'null': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         },
         'QCM.subject': {
             'Meta': {'object_name': 'Subject'},
