@@ -31,30 +31,34 @@ from urllib import urlencode
 # Modify these values to control how the testing is done
 
 # How many threads should be running at peak load.
-NUM_THREADS = 50
+NUM_THREADS = 10
 
 # How many minutes the test should run with all threads active.
-TIME_AT_PEAK_QPS = 60 # secondes
+TIME_AT_PEAK_QPS = 10 # secondes
 
 # How many seconds to wait between starting threads.
 # Shouldn't be set below 30 seconds.
-DELAY_BETWEEN_THREAD_START = 10 # seconds
+DELAY_BETWEEN_THREAD_START = 15 # seconds
 
 quitevent = Event()
 all_thread = Event()
+
+count = 0
 
 def threadproc():
     """This function is executed by each thread."""
 
     print "Thread started: %s" % current_thread().getName()
     h = httplib2.Http(timeout = 30)
+    global count
     while not quitevent.is_set():
         if all_thread.is_set():
+            count +=1
             try:
                 # HTTP requests to exercise the server go here
                 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 resp, content = h.request(
-                    "http://counterfreshplanet.appspot.com/increment")
+                    "http://127.0.0.1:8080/increment")
                 if resp.status != 200:
                     pass
                 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -65,7 +69,7 @@ def threadproc():
                 # HTTP requests to exercise the server go here
                 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 resp, content = h.request(
-                    "http://counterfreshplanet.appspot.com")
+                    "http://127.0.0.1:8080/")
                 if resp.status != 200:
                     pass
                 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -96,3 +100,4 @@ if __name__ == "__main__":
     for t in threads:
         t.join(1.0)
     print "Finished"
+    print count
