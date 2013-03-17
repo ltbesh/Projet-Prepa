@@ -58,7 +58,7 @@ def threadproc():
                 # HTTP requests to exercise the server go here
                 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 resp, content = h.request(
-                    "http://127.0.0.1:8080/increment")
+                    "http://counterfreshplanet.appspot.com/increment")
                 if resp.status != 200:
                     pass
                 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -69,7 +69,7 @@ def threadproc():
                 # HTTP requests to exercise the server go here
                 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 resp, content = h.request(
-                    "http://127.0.0.1:8080/")
+                    "http://counterfreshplanet.appspot.com/")
                 if resp.status != 200:
                     pass
                 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
