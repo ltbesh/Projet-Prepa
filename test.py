@@ -31,7 +31,7 @@ from urllib import urlencode
 # Modify these values to control how the testing is done
 
 # How many threads should be running at peak load.
-NUM_THREADS = 5
+NUM_THREADS = 50
 
 # How many minutes the test should run with all threads active.
 TIME_AT_PEAK_QPS = 60 # secondes
@@ -54,7 +54,7 @@ def threadproc():
                 # HTTP requests to exercise the server go here
                 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 resp, content = h.request(
-                    "http://127.0.0.1:8080/increment")
+                    "http://counterfreshplanet.appspot.com/increment")
                 if resp.status != 200:
                     pass
                 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -65,7 +65,7 @@ def threadproc():
                 # HTTP requests to exercise the server go here
                 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 resp, content = h.request(
-                    "http://127.0.0.1:8080/")
+                    "http://counterfreshplanet.appspot.com")
                 if resp.status != 200:
                     pass
                 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
