@@ -31,10 +31,10 @@ from urllib import urlencode
 # Modify these values to control how the testing is done
 
 # How many threads should be running at peak load.
-NUM_THREADS = 5
+NUM_THREADS = 6
 
 # How many minutes the test should run with all threads active.
-TIME_AT_PEAK_QPS = 120 # secondes
+TIME_AT_PEAK_QPS = 300 # secondes
 
 # How many seconds to wait between starting threads.
 # Shouldn't be set below 30 seconds.
@@ -52,29 +52,17 @@ def threadproc():
     h = httplib2.Http(timeout = 30)
     global count
     while not quitevent.is_set():
-        if all_thread.is_set():
-            count +=1
-            try:
-                # HTTP requests to exercise the server go here
-                # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                resp, content = h.request(
-                    "http://counterfreshplanet2.appspot.com/increment")
-                if resp.status != 200:
-                    pass
-                # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            except socket.timeout:
+        count +=1
+        try:
+            # HTTP requests to exercise the server go here
+            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            resp, content = h.request(
+                "http://counterfreshplanet2.appspot.com/increment")
+            if resp.status != 200:
                 pass
-        else:
-            try:
-                # HTTP requests to exercise the server go here
-                # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                resp, content = h.request(
-                    "http://counterfreshplanet2.appspot.com/")
-                if resp.status != 200:
-                    pass
-                # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            except socket.timeout:
-                pass
+            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        except socket.timeout:
+            pass
 
     print "Thread finished: %s" % current_thread().getName()
 
@@ -88,7 +76,6 @@ if __name__ == "__main__":
             t.start()
             threads.append(t)
             time.sleep(DELAY_BETWEEN_THREAD_START)
-        all_thread.set()
         print "All threads running"
         time.sleep(TIME_AT_PEAK_QPS)
         print "Completed full time at peak qps, shutting down threads"
