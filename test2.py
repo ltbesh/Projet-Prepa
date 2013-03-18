@@ -31,10 +31,10 @@ from urllib import urlencode
 # Modify these values to control how the testing is done
 
 # How many threads should be running at peak load.
-NUM_THREADS = 20
+NUM_THREADS = 3
 
 # How many minutes the test should run with all threads active.
-TIME_AT_PEAK_QPS = 10 # secondes
+TIME_AT_PEAK_QPS = 60 # secondes
 
 # How many seconds to wait between starting threads.
 # Shouldn't be set below 30 seconds.
