@@ -11,7 +11,8 @@
 		<li>
 			<form  method="post" action=".">
 			{% csrf_token %}
-			<input class = "btn" type="submit" name= answer value="{{ answer }}" />
+			<input type="hidden" name="answer" value="{{answer}}">
+			<a class="btn" href="#" onclick="parentNode.submit()">{{ answer }}</a>
 			</form>
 		</li>
 	{% endfor %}
