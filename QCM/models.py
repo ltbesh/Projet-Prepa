@@ -41,6 +41,12 @@ class Question(models.Model):
 	
 	def __unicode__ (self):
 		return self.question
+	def get_chapter(self):
+		return self.chapter.all()
+	def get_subject(self):
+		return self.subject.all()
+	def get_level(self):
+		return self.clevel.all()
 
 class Quizz(models.Model):
 
