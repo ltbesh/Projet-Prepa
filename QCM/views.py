@@ -26,7 +26,9 @@ def question_selection(request):
     if request.method == 'POST': # If the form has been submitted...
         form = QuestionSelectionForm(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
+            print request.POST
             quizz = Quizz.new(request.user,request.POST["chapter"],request.POST["subject"],request.POST["level"])
+            print quizz
             quizz.save()
             quizz.append()
             quizz.save()
@@ -43,6 +45,8 @@ def answer_question(request):
     quizz = request.session['quizz']
 
     if request.method == 'POST': 
+        print request.POST
+        print request.POST['answer']
         answer = get_object_or_404(Answer,answer = request.POST["answer"], question = request.session['question'])
         guess = Guess.new(quizz,answer) 
         guess.save()
@@ -123,8 +127,10 @@ def display_user_profile(request):
             subject = request.POST['subject'], 
             chapter = request.POST['chapter'])
         form = QuestionSelectionForm(request.POST)
-
-    grade = quizz.aggregate(Avg('grade'))["grade__avg"]
+    try:
+        grade = round (quizz.aggregate(Avg('grade'))["grade__avg"],1)
+    except:
+        grade = 0
 
     return render_to_response('QCM/user_profile.html', {
         'form' : form,

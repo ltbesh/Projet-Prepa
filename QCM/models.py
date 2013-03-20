@@ -32,10 +32,10 @@ class Chapter(models.Model):# Example : Calculus, algebra ...
 		return self.name
 
 class Question(models.Model):
-	level = models.ForeignKey(Level)
-	subject = models.ForeignKey(Subject)
-	chapter = models.ForeignKey(Chapter)
-	pub_date = models.DateTimeField('date published')
+	level = models.ManyToManyField(Level)
+	subject = models.ManyToManyField(Subject)
+	chapter = models.ManyToManyField(Chapter)
+	pub_date = models.DateTimeField('date published', default = datetime.now())
 	
 	question = models.CharField(max_length = 2000)
 	

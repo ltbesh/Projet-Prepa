@@ -15,7 +15,6 @@ class QuestionInline(admin.StackedInline):
 class QuestionAdmin(admin.ModelAdmin):	
 	fieldsets = [
         (None,               {'fields': ['question', 'chapter', 'subject', 'level']}),
-        ('Date information', {'fields': ['pub_date']}),
     ]
 
 	inlines = [AnswerInline]
