@@ -7,16 +7,16 @@ class AnswerInline(admin.StackedInline):
 	model = Answer
 	extra = 4
 		
-class QuestionInline(admin.StackedInline):
-	model = Question
-	extra = 1
+#~ class QuestionInline(admin.StackedInline):
+	#~ model = Question
+	#~ extra = 1
 
 
 class QuestionAdmin(admin.ModelAdmin):	
 	fieldsets = [
         (None,               {'fields': ['question', 'chapter', 'subject', 'level']}),
     ]
-
+	list_display = ('question', 'get_chapter', 'get_subject', 'get_level')
 	inlines = [AnswerInline]
 
 
