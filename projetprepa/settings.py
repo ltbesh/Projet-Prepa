@@ -76,9 +76,7 @@ ROOT_URLCONF = 'urls'
 WSGI_APPLICATION = 'projetprepa.wsgi.application'
 
 TEMPLATE_DIRS = (
-	'templates/admin'
     'QCM/templates/QCM',
-    'QCM/templates/admin',
     'registration/templates/registration'
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
