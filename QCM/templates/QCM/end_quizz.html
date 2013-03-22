@@ -4,18 +4,18 @@
 
 <ol>
 	<h5>
-		{% trans 'Your grade' %} : {{note_finale}} / 20
+		{% trans 'Your grade' %} : {{grade}} / 20
 	</h5>
-	{% for l in liste%}
+	{% for question in question_list%}
 
-	<h6>{{l.0}}</h6>
-	{% if l.1 == l.2%}
+	<h6>{{question.0}}</h6>
+	{% if question.1 == question.2%}
 		<div class="alert alert-success">
-		{% trans 'Your answer'%} : {{l.1}}
+		{% trans 'Your answer'%} : {{question.1}}
 		{% else %}
 		<div class="alert alert-error">
-		{% trans 'Your answer'%} : {{l.1}}</br>
-		{% trans 'The correct answer was'%} : {{l.2}}
+		{% trans 'Your answer'%} : {{question.1}}</br>
+		{% trans 'The correct answer was'%} : {{question.2}}
 	{% endif %}
 	</div>
 	{% endfor %}

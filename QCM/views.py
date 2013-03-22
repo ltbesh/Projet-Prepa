@@ -8,11 +8,10 @@ from django.contrib.auth.forms import UserCreationForm
 import datetime, random, sha, sys
 from django.shortcuts import render_to_response, get_object_or_404, render
 from django.core.mail import send_mail
-from QCM.models import UserProfile, Quizz, Question, Answer, Guess, News
+from QCM.models import UserProfile, Quizz, Question, Answer, Guess, News, QuestionStatus
 from QCM.forms import QuestionSelectionForm
 from django.db.models import Avg
 from django.shortcuts import redirect
-
 
 
 @login_required()
@@ -26,90 +25,84 @@ def question_selection(request):
     if request.method == 'POST': # If the form has been submitted...
         form = QuestionSelectionForm(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
-            print request.POST
             quizz = Quizz.new(request.user,request.POST["chapter"],request.POST["subject"],request.POST["level"])
-            print quizz
             quizz.save()
             quizz.append()
             quizz.save()
-            request.session['quizz'] = quizz
-            return redirect('QCM_answer_question') # Redirect after POST
+            return redirect('QCM_quizz', quizz.id) # Redirect after POST
     else:
         form = QuestionSelectionForm()  
         return render_to_response('QCM/questionselection.html',{'form': form},context_instance=RequestContext(request))
 
 
 @login_required()
-def answer_question(request):
-    
-    quizz = request.session['quizz']
+def display_quizz(request, id):
 
-    if request.method == 'POST': 
-        print request.POST
-        print request.POST['answer']
-        answer = get_object_or_404(Answer,answer = request.POST["answer"], question = request.session['question'])
+    quizz = get_object_or_404(Quizz, pk = id)
+
+    # If user does not own quizz
+    if quizz.user != request.user:
+        # Mettre un redirect a la place
+        return redirect('index')
+
+    if request.method == 'POST':
+        # We store the guess and redirect to the same view
+        question = get_object_or_404(Question, pk = request.POST['question'])
+        answer = get_object_or_404(Answer,answer = request.POST["answer"], question = question)
         guess = Guess.new(quizz,answer) 
         guess.save()
 
-    question_request = Question.objects.filter(quizz = quizz)
-    guess_request = Guess.objects.filter(quizz = quizz)
+        question_status = QuestionStatus.objects.get(question = question.id, quizz = quizz.id)
+        question_status.answered = True
+        question_status.save()
+        return redirect('QCM_quizz', quizz.id)
 
-    question_list = []
-    for q in question_request:
-        question_list.append(q)
-    
-    for g in guess_request:
-        question_list.remove(g.answer.question)
-    random.shuffle(question_list)
+    else:
+    # Test wether or not the quizz is finished
+        if quizz.finished:
+        # Compute the grade and save it, send question, guess and correct answers to the template
+            guess_request = Guess.objects.filter(quizz = quizz)
+            question_list = []
+            nb_correct_answer = 0
 
-    try: 
-        request.session['question'] = question_list[0]
-    except:
-        return redirect('QCM_end_quizz')
+            for guess in guess_request:
+                if guess.answer.validity:
+                    nb_correct_answer += 1
+                    correct_answer = guess.answer
+                else:
+                    try:
+                        correct_answer = Answer.objects.get(question = guess.answer.question, validity = 1)
+                    except:
+                        correct_answer = "Il n'y avait pas de bonne reponse"
+                question_list.append((guess.answer.question, guess.answer, correct_answer))
 
-    answer_list = Answer.objects.filter(question = request.session['question']).order_by('?')
-    
-    return render_to_response('QCM/start_quizz.html',{
-        'answers':answer_list, 
-        'question':request.session['question']
-        },context_instance = RequestContext(request))
-            
-
-@login_required()
-def end_quizz(request):
-    q = request.session['quizz']
-    guess_list = []
-    guess = Guess.objects.filter(quizz = q)
-    
-    note = 0
-    liste = []
-    
-    for g in guess:
-        liste2 = []
-        guess_list.append(g)
-        liste2.append(g.answer.question)
-        liste2.append(g.answer)
-        if g.answer.validity:
-            note = note + 1
-            liste2.append(g.answer)
-        else:
-            plop = Answer.objects.filter(question = g.answer.question, validity = 1)
             try:
-                liste2.append(plop[0])
-            except IndexError , e:
-                liste2.append("Il n'y avait pas de bonne reponse")
+                grade = round((nb_correct_answer / float(len(guess_request))) * 20.0)
+            except:
+                grade = 0
+            quizz.grade = grade
+            quizz.save()
+            return render_to_response('QCM/end_quizz.html',{
+                'grade' : grade, 
+                'question_list' : question_list
+                }, context_instance = RequestContext(request))
+        else:
+        # Retrieve a question that has not been answered yet and send it to the template
+            try:
+                question = Question.objects.filter(questionstatus__quizz = quizz.id, questionstatus__answered = False)[0]
+            except:
+                quizz.finished = True
+                quizz.save()
+                return redirect('QCM_quizz', quizz.id)
 
-        liste.append(liste2)
-
-    try:
-        note_finale = (note / float(len(guess_list))) * 20.0
-        note_finale = round(note_finale, 1)
-    except:
-        note_finale = 0
-    q.grade = note_finale
-    q.save()
-    return render_to_response('QCM/end_quizz.html',{'note_finale' : note_finale, 'liste' : liste}, context_instance = RequestContext(request))
-
+            answer_list = Answer.objects.filter(question = question).order_by('?')
+            
+            return render_to_response('QCM/start_quizz.html',{
+                'answers':answer_list, 
+                'question':question,
+                'quizz':quizz
+                },context_instance = RequestContext(request))
+                
 @login_required
 def display_user_profile(request):
 
@@ -118,9 +111,7 @@ def display_user_profile(request):
 
     if request.method == 'POST':
         if 'quizz_id' in request.POST:
-            quizz = get_object_or_404(Quizz, pk = request.POST['quizz_id'])
-            request.session['quizz'] = quizz
-            return redirect('QCM_end_quizz')
+            return redirect('QCM_quizz', request.POST['quizz_id'])
 
         quizz = quizz.filter(
             level = request.POST['level'], 
@@ -137,5 +128,3 @@ def display_user_profile(request):
         'quizz' : quizz,
         'grade' : grade
     }, context_instance = RequestContext(request))
-
-

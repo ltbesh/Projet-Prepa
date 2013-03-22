@@ -52,11 +52,12 @@ class Quizz(models.Model):
 
 	user = models.ForeignKey(User)
 	date_started = models.DateTimeField('date started')
-	questions = models.ManyToManyField(Question)
+	questions = models.ManyToManyField(Question, through = 'QuestionStatus')
 	level = models.ForeignKey(Level, null = True)
 	subject = models.ForeignKey(Subject, null = True)
 	chapter = models.ForeignKey(Chapter, null = True)
 	grade = models.IntegerField(default = 0)
+	finished = models.BooleanField(default = False)
 
 	@classmethod
 	def new(cls,user, chapter, subject, level):
@@ -70,12 +71,19 @@ class Quizz(models.Model):
 	def append(self, number = 10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
 		question_list = Question.objects.filter(chapter = self.chapter, subject = self.subject,level = self.level).order_by('?')[0:number]
 		for question in question_list:
-			self.questions.add(question)
+			question_status = QuestionStatus.objects.create(question = question, quizz = self, answered = False)
 
 	def __unicode__ (self):
 			return str(self.user) + "--" + str(self.date_started)
 			
-		
+class QuestionStatus(models.Model):
+	question = models.ForeignKey(Question)
+	quizz = models.ForeignKey(Quizz)
+	answered = models.BooleanField(default = False)	
+
+	def __unicode__ (self):
+			return str(self.answered)
+
 class Answer(models.Model):
 	question = models.ForeignKey(Question)
 	answer = models.CharField(max_length = 200)
@@ -101,10 +109,3 @@ class News(models.Model):
 	title = models.CharField(max_length = 200)
 	content = models.TextField()
 
-#class Temporary_Questions(models.Model): # inherit from question, has comments from admin and moderators in addition to questions fields
-	
-
-
-#class Tags(models.Model):
-#	tag = models.CharField(max_length=15)
-	

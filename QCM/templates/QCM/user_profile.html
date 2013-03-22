@@ -32,7 +32,11 @@
 			<form style="margin-bottom: 0" name = "results" method = "post" action = ".">
 			{% csrf_token %}
 				<input type = "hidden" name = "quizz_id" value = {{q.pk}} />
+				{% if q.finished %}
 				<input class = "btn" type="submit" name= "quizz"  value="{{ q.grade }}" />
+				{% else %}
+				<input class = "btn" type="submit" name= "quizz"  value="{%trans "Finish"%}" />
+				{% endif %}
 			</form>
 		</td>
 	</tr>
