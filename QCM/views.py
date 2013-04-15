@@ -154,19 +154,43 @@ def geography(request):
     book = open_workbook('QCM/Capitales.xls')
     sheet = book.sheet_by_index(0)
 
+    subject = Subject.objects.get_or_create(name = 'Geographie')[0]
+    level = Level.objects.get_or_create(name = 'auto')[0]
     for i in range(sheet.nrows):
+        #Capitale ! Pays ? 
+        chapter = Chapter.objects.get_or_create(name = 'capitale-pays')[0]
         question_cell = sheet.cell(i,0).value
-        question = Question(question = question_wording + " " + question_cell + " ?")
+        question = Question(question = "Quel est le pays dont la capitale est : " + question_cell + " ?", subject = subject, chapter = chapter, level = level)
         question.save()
         good_answer_cell = sheet.cell(i, 1).value
         good_answer = Answer(answer = good_answer_cell, question = question, validity = True)
         good_answer.save()
 
+        #Pays ! CApitale ? 
+        chapter = Chapter.objects.get_or_create(name = 'pays-capitale')[0]
         question_cell = sheet.cell(i,1).value
-        question1 = Question(question = question_wording_backward + " " + question_cell + " ?")
+        question1 = Question(question = "Quelle est la capitale de ce pays : " + question_cell + " ?", subject = subject, chapter = chapter, level = level)
         question1.save()
         good_answer_cell = sheet.cell(i, 0).value
         good_answer = Answer(answer = good_answer_cell, question = question1, validity = True)
+        good_answer.save()
+
+        #Pays ! Drapeau ? 
+        chapter = Chapter.objects.get_or_create(name = 'pays-drapeau')[0]
+        question_cell = sheet.cell(i,1).value
+        question2 = Question(question = "Quel est le drapeau de ce pays : " + question_cell + " ?", subject = subject, chapter = chapter, level = level)
+        question2.save()
+        good_answer_cell = sheet.cell(i, 2).value
+        good_answer = Answer(answer = good_answer_cell, question = question2, validity = True)
+        good_answer.save()
+
+        #Drapeau ! Pays ? 
+        chapter = Chapter.objects.get_or_create(name = 'drapeau-pays')[0]
+        question_cell = sheet.cell(i,2).value
+        question3 = Question(question = "A quel pays appartient ce drapeau : " + question_cell + " ?", subject = subject, chapter = chapter, level = level)
+        question3.save()
+        good_answer_cell = sheet.cell(i, 1).value
+        good_answer = Answer(answer = good_answer_cell, question = question3, validity = True)
         good_answer.save()
 
         for j in range(3):
@@ -180,5 +204,14 @@ def geography(request):
             bad_answer_cell = sheet.cell(rand, 0).value
             bad_answer = Answer(answer = bad_answer_cell, question = question1, validity = False)
             bad_answer.save()
+
+            bad_answer_cell = sheet.cell(rand, 2).value
+            bad_answer = Answer(answer = bad_answer_cell, question = question2, validity = False)
+            bad_answer.save()
+
+            bad_answer_cell = sheet.cell(rand, 1).value
+            bad_answer = Answer(answer = bad_answer_cell, question = question3, validity = False)
+            bad_answer.save()
+
 
 
