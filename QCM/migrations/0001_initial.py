@@ -41,10 +41,10 @@ class Migration(SchemaMigration):
         # Adding model 'Question'
         db.create_table('QCM_question', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('level', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Level'])),
-            ('subject', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Subject'])),
-            ('chapter', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Chapter'])),
-            ('pub_date', self.gf('django.db.models.fields.DateTimeField')()),
+            ('level', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Level'], null=True)),
+            ('subject', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Subject'], null=True)),
+            ('chapter', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Chapter'], null=True)),
+            ('pub_date', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2013, 4, 14, 0, 0))),
             ('question', self.gf('django.db.models.fields.CharField')(max_length=2000)),
         ))
         db.send_create_signal('QCM', ['Question'])
@@ -53,21 +53,23 @@ class Migration(SchemaMigration):
         db.create_table('QCM_quizz', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('date_started', self.gf('django.db.models.fields.DateTimeField')()),
+            ('date_started', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2013, 4, 14, 0, 0))),
             ('level', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Level'], null=True)),
             ('subject', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Subject'], null=True)),
             ('chapter', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Chapter'], null=True)),
             ('grade', self.gf('django.db.models.fields.IntegerField')(default=0)),
+            ('finished', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
         db.send_create_signal('QCM', ['Quizz'])
 
-        # Adding M2M table for field questions on 'Quizz'
-        db.create_table('QCM_quizz_questions', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('quizz', models.ForeignKey(orm['QCM.quizz'], null=False)),
-            ('question', models.ForeignKey(orm['QCM.question'], null=False))
+        # Adding model 'QuestionStatus'
+        db.create_table('QCM_questionstatus', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('question', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Question'])),
+            ('quizz', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['QCM.Quizz'])),
+            ('answered', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
-        db.create_unique('QCM_quizz_questions', ['quizz_id', 'question_id'])
+        db.send_create_signal('QCM', ['QuestionStatus'])
 
         # Adding model 'Answer'
         db.create_table('QCM_answer', (
@@ -117,8 +119,8 @@ class Migration(SchemaMigration):
         # Deleting model 'Quizz'
         db.delete_table('QCM_quizz')
 
-        # Removing M2M table for field questions on 'Quizz'
-        db.delete_table('QCM_quizz_questions')
+        # Deleting model 'QuestionStatus'
+        db.delete_table('QCM_questionstatus')
 
         # Deleting model 'Answer'
         db.delete_table('QCM_answer')
@@ -165,21 +167,29 @@ class Migration(SchemaMigration):
         },
         'QCM.question': {
             'Meta': {'object_name': 'Question'},
-            'chapter': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Chapter']"}),
+            'chapter': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Chapter']", 'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'level': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Level']"}),
-            'pub_date': ('django.db.models.fields.DateTimeField', [], {}),
+            'level': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Level']", 'null': 'True'}),
+            'pub_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 14, 0, 0)'}),
             'question': ('django.db.models.fields.CharField', [], {'max_length': '2000'}),
-            'subject': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Subject']"})
+            'subject': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Subject']", 'null': 'True'})
+        },
+        'QCM.questionstatus': {
+            'Meta': {'object_name': 'QuestionStatus'},
+            'answered': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'question': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Question']"}),
+            'quizz': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Quizz']"})
         },
         'QCM.quizz': {
             'Meta': {'object_name': 'Quizz'},
             'chapter': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Chapter']", 'null': 'True'}),
-            'date_started': ('django.db.models.fields.DateTimeField', [], {}),
+            'date_started': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 14, 0, 0)'}),
+            'finished': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'grade': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'level': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Level']", 'null': 'True'}),
-            'questions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['QCM.Question']", 'symmetrical': 'False'}),
+            'questions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['QCM.Question']", 'through': "orm['QCM.QuestionStatus']", 'symmetrical': 'False'}),
             'subject': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['QCM.Subject']", 'null': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         },

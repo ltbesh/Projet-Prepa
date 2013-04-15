@@ -13,8 +13,10 @@
 			{% csrf_token %}
 			<input type="hidden" name="answer" value="{{answer}}">
 			<input type="hidden" name="question" value="{{question.pk}}">
+			<input type="hidden" name="quizz" value="{{quizz.pk}}">
 			<a class="btn" href="#" onclick="parentNode.submit()">{{answer}}</a>
 			</form>
+			<p>quizz : {{quizz.pk}}</p>
 		</li>
 	{% endfor %}
 

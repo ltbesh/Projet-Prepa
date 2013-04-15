@@ -46,7 +46,7 @@
             <ul class="nav">
                   <li><a href="{% url index %}"><i class="icon-home icon-white"></i>{% trans 'Home'%}</a></li>
                 {% if user.is_authenticated %}
-                  <li><a href="{% url QCM_selection %}">{% trans 'New Quizz' %}</a></li>
+                  <li><a href="{% url quizz_create %}">{% trans 'New Quizz' %}</a></li>
             </ul>
             <ul class="nav pull-right">
                   <li class = "dropdown">

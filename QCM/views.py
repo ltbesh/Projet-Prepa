@@ -3,105 +3,116 @@ from django.http import HttpResponse, HttpResponseRedirect
 from QCM.models import Question
 from random import randint
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required 
 from django.contrib.auth.forms import UserCreationForm
 import datetime, random, sha, sys
 from django.shortcuts import render_to_response, get_object_or_404, render
 from django.core.mail import send_mail
 from QCM.models import UserProfile, Quizz, Question, Answer, Guess, News, QuestionStatus
-from QCM.forms import QuestionSelectionForm
+from QCM.forms import QuizzCreateForm
 from django.db.models import Avg
 from django.shortcuts import redirect
+from django.views.generic import CreateView, DetailView, FormView
+from django.utils.decorators import method_decorator
 
+# Import excel
+from xlrd import open_workbook,XL_CELL_TEXT
 
 @login_required()
 def index(request):
     news = News.objects.all().order_by('date_created')[0:10]
-    return render_to_response('QCM/index.html', {'news' : news}, context_instance=RequestContext(request))  
+    return render_to_response('QCM/index.html', {'news' : news}, context_instance = RequestContext(request))  
 
-# Display the form for initializing MCQ so that user create its MCQ based on chosen options
-@login_required()
-def question_selection(request): 
-    if request.method == 'POST': # If the form has been submitted...
-        form = QuestionSelectionForm(request.POST) # A form bound to the POST data
-        if form.is_valid(): # All validation rules pass
-            quizz = Quizz.new(request.user,request.POST["chapter"],request.POST["subject"],request.POST["level"])
-            quizz.save()
-            quizz.append()
-            quizz.save()
-            return redirect('QCM_quizz', quizz.id) # Redirect after POST
-    else:
-        form = QuestionSelectionForm()  
-        return render_to_response('QCM/questionselection.html',{'form': form},context_instance=RequestContext(request))
+# Create new quizz based on which subject / level / chapter the user choose
+class QuizzCreate(CreateView):
+    model = Quizz        
+    form_class = QuizzCreateForm
 
+    def form_valid(self, form):
+        quizz = form.save(commit = False)
+        quizz.user = self.request.user
+        quizz.save()
+        quizz.add_question()
+        return HttpResponseRedirect(quizz.get_absolute_url())
 
-@login_required()
-def display_quizz(request, id):
+class QuestionDisplay(DetailView):
+    model = Question
+    context_object_name = "question"
 
-    quizz = get_object_or_404(Quizz, pk = id)
-
-    # If user does not own quizz
-    if quizz.user != request.user:
-        # Mettre un redirect a la place
-        return redirect('index')
-
-    if request.method == 'POST':
+    def form_valid(self, form):
         # We store the guess and redirect to the same view
+        print "form"
         question = get_object_or_404(Question, pk = request.POST['question'])
-        answer = get_object_or_404(Answer,answer = request.POST["answer"], question = question)
+        answer = get_object_or_404(Answer,answer = request.POST['answer'], question = question)
+        quizz = get_object_or_404(Quizz, pk = request.POST['quizz'])
         guess = Guess.new(quizz,answer) 
         guess.save()
 
         question_status = QuestionStatus.objects.get(question = question.id, quizz = quizz.id)
         question_status.answered = True
         question_status.save()
-        return redirect('QCM_quizz', quizz.id)
+        return redirect('quizz_display', quizz.id)
 
-    else:
-    # Test wether or not the quizz is finished
+    def get_context_data(self, **kwargs):
+        print 'context'
+        context = super(QuestionDisplay, self).get_context_data(**kwargs)
+        context['answers'] = Answer.objects.filter(question = self.get_object()).order_by('?')
+        return context
+
+class QuizzDisplay(DetailView):
+    """
+    If the quizz is not finished, display an question not answered yet,
+    otherwise display the results of the quizz
+    """
+    model = Quizz
+    context_object_name = "quizz"
+
+    def get_context_data(self, **kwargs):
+        quizz = self.get_object()
+        context = super(QuizzDisplay, self).get_context_data(**kwargs)
+        guess_request = Guess.objects.filter(quizz = quizz)
+        question_list = []
+        nb_correct_answer = 0
+
+        for guess in guess_request:
+            if guess.answer.validity:
+                nb_correct_answer += 1
+                correct_answer = guess.answer
+            else:
+                try:
+                    correct_answer = Answer.objects.get(question = guess.answer.question, validity = 1)
+                except:
+                    correct_answer = "Il n'y avait pas de bonne reponse"
+            question_list.append((guess.answer.question, guess.answer, correct_answer))
+
+        context['question_list'] = question_list
+
+        self.compute_grade(nb_correct_answer, float(len(guess_request)))
+
+        return context
+
+    def compute_grade(self, nb_correct_answer, nb_questions):
+        quizz = self.get_object()
+        try:
+            grade = round((nb_correct_answer / nb_questions)) * 20.0
+        except:
+            grade = 0
+        quizz.grade = grade
+        quizz.save()     
+
+    def get(self, request, *args, **kwargs):
+        quizz = self.get_object()
+        # If user does not own quizz
+        if quizz.user != request.user:
+            return redirect('index')
         if quizz.finished:
-        # Compute the grade and save it, send question, guess and correct answers to the template
-            guess_request = Guess.objects.filter(quizz = quizz)
-            question_list = []
-            nb_correct_answer = 0
-
-            for guess in guess_request:
-                if guess.answer.validity:
-                    nb_correct_answer += 1
-                    correct_answer = guess.answer
-                else:
-                    try:
-                        correct_answer = Answer.objects.get(question = guess.answer.question, validity = 1)
-                    except:
-                        correct_answer = "Il n'y avait pas de bonne reponse"
-                question_list.append((guess.answer.question, guess.answer, correct_answer))
-
-            try:
-                grade = round((nb_correct_answer / float(len(guess_request))) * 20.0)
-            except:
-                grade = 0
-            quizz.grade = grade
-            quizz.save()
-            return render_to_response('QCM/end_quizz.html',{
-                'grade' : grade, 
-                'question_list' : question_list
-                }, context_instance = RequestContext(request))
+            return super(QuizzDisplay, self).get(self, request, *args, **kwargs)
         else:
-        # Retrieve a question that has not been answered yet and send it to the template
-            try:
-                question = Question.objects.filter(questionstatus__quizz = quizz.id, questionstatus__answered = False)[0]
-            except:
-                quizz.finished = True
-                quizz.save()
-                return redirect('QCM_quizz', quizz.id)
-
-            answer_list = Answer.objects.filter(question = question).order_by('?')
-            
-            return render_to_response('QCM/start_quizz.html',{
-                'answers':answer_list, 
-                'question':question,
-                'quizz':quizz
-                },context_instance = RequestContext(request))
+            question = quizz.get_unanswered_question()
+            if question :
+                return redirect('question_display', question.pk)
+            else :
+                return redirect('quizz_display', quizz.id)
                 
 @login_required
 def display_user_profile(request):
@@ -128,3 +139,59 @@ def display_user_profile(request):
         'quizz' : quizz,
         'grade' : grade
     }, context_instance = RequestContext(request))
+
+def import_questions(request):
+
+    book = open_workbook('QCM/Capitales.xls')
+    sheet = book.sheet_by_index(1)
+
+    
+    for i in range(sheet.nrows):
+        question_cell = sheet.cell(i,0).value
+        question = Question(question = question_cell)
+        question.save()
+
+        for j in range(4):
+            good_answer_cell = sheet.cell(i,j + 1).value
+            if j == 0:
+                validity = True
+            else:
+                validity = False
+            answer = Answer(answer = good_answer_cell, question = question, validity = validity)
+            answer.save()
+
+def geography(request, question_wording = 'De quel pays cette vile est elle la capitale : ', question_wording_backward = 'Quelle est la capitale  de ce pays : ', first_column = 0, second_column = 1):
+
+    book = open_workbook('QCM/Capitales.xls')
+    sheet = book.sheet_by_index(0)
+
+    for i in range(sheet.nrows):
+        question_cell = sheet.cell(i,first_column).value
+        question = Question(question = question_wording + " " + question_cell + " ?")
+        question.save()
+        good_answer_cell = sheet.cell(i, second_column).value
+        good_answer = Answer(answer = good_answer_cell, question = question, validity = True)
+        good_answer.save()
+
+        question_cell = sheet.cell(i,second_column).value
+        question1 = Question(question = question_wording_backward + " " + question_cell + " ?")
+        question1.save()
+        good_answer_cell = sheet.cell(i, first_column).value
+        good_answer = Answer(answer = good_answer_cell, question = question1, validity = True)
+        good_answer.save()
+
+        for j in range(3):
+            rand = i
+            while rand == i:
+                rand = randint(0, sheet.nrows - 1)
+            bad_answer_cell = sheet.cell(rand, second_column).value
+            bad_answer = Answer(answer = bad_answer_cell, question = question, validity = False)
+            bad_answer.save()
+
+            bad_answer_cell = sheet.cell(rand, first_column).value
+            bad_answer = Answer(answer = bad_answer_cell, question = question1, validity = False)
+            bad_answer.save()
+
+
+
+

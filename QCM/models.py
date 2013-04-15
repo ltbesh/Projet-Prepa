@@ -6,6 +6,8 @@ import time
 from time import mktime
 from datetime import datetime
 from django.shortcuts import get_object_or_404
+from django.core.urlresolvers import reverse
+
 
 class UserProfile(models.Model): #Used for registration
 	user = models.OneToOneField(User)
@@ -32,9 +34,9 @@ class Chapter(models.Model):# Example : Calculus, algebra ...
 		return self.name
 
 class Question(models.Model):
-	level = models.ManyToManyField(Level)
-	subject = models.ManyToManyField(Subject)
-	chapter = models.ManyToManyField(Chapter)
+	level = models.ForeignKey(Level, null = True)
+	subject = models.ForeignKey(Subject, null = True)
+	chapter = models.ForeignKey(Chapter, null = True)
 	pub_date = models.DateTimeField('date published', default = datetime.now())
 	
 	question = models.CharField(max_length = 2000)
@@ -42,47 +44,50 @@ class Question(models.Model):
 	def __unicode__ (self):
 		return self.question
 	def get_chapter(self):
-		return self.chapter.all()
+		return self.chapter
 	def get_subject(self):
-		return self.subject.all()
+		return self.subject
 	def get_level(self):
-		return self.clevel.all()
+		return self.level
 
 class Quizz(models.Model):
-
 	user = models.ForeignKey(User)
-	date_started = models.DateTimeField('date started')
+	date_started = models.DateTimeField('date started', default = datetime.now())
 	questions = models.ManyToManyField(Question, through = 'QuestionStatus')
 	level = models.ForeignKey(Level, null = True)
 	subject = models.ForeignKey(Subject, null = True)
 	chapter = models.ForeignKey(Chapter, null = True)
 	grade = models.IntegerField(default = 0)
 	finished = models.BooleanField(default = False)
-
-	@classmethod
-	def new(cls,user, chapter, subject, level):
-		struct=time.localtime()
-		level = get_object_or_404(Level, pk = level)
-		subject = get_object_or_404(Subject, pk = subject)
-		chapter = get_object_or_404(Chapter, pk = chapter)
-		quizz=cls(user = user, level = level, subject = subject, chapter = chapter, date_started = datetime.fromtimestamp(mktime(struct)))
-		return quizz
 		
-	def append(self, number = 10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
-		question_list = Question.objects.filter(chapter = self.chapter, subject = self.subject,level = self.level).order_by('?')[0:number]
+	def add_question(self, number = 10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
+		question_list = Question.objects.order_by('?')[0:number]
 		for question in question_list:
-			question_status = QuestionStatus.objects.create(question = question, quizz = self, answered = False)
+			question_status = QuestionStatus(question = question, quizz = self)
+			question_status.save()
+
+	def get_unanswered_question(self):
+		try:
+		    question = Question.objects.filter(questionstatus__quizz = self.id, questionstatus__answered = False)[0]
+		except:
+		    self.finished = True
+		    self.save()
+		    question = False
+		return question
+		
+	def get_absolute_url(self):
+		return reverse('quizz_display', args=[str(self.id)])
 
 	def __unicode__ (self):
-			return str(self.user) + "--" + str(self.date_started)
-			
+			return str(self.user) + "--" + str(self.date_started) + '--' + str(self.level)
+
 class QuestionStatus(models.Model):
 	question = models.ForeignKey(Question)
 	quizz = models.ForeignKey(Quizz)
 	answered = models.BooleanField(default = False)	
 
 	def __unicode__ (self):
-			return str(self.answered)
+		return str(self.question) + " " + str(self.quizz) + " " + str(self.answered)
 
 class Answer(models.Model):
 	question = models.ForeignKey(Question)
