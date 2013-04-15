@@ -8,7 +8,7 @@ from django.contrib.auth.forms import UserCreationForm
 import datetime, random, sha, sys
 from django.shortcuts import render_to_response, get_object_or_404, render
 from django.core.mail import send_mail
-from QCM.models import UserProfile, Quizz, Question, Answer, Guess, News, QuestionStatus
+from QCM.models import UserProfile, Quizz, Question, Answer, Guess, News, QuestionStatus, Subject, Chapter
 from QCM.forms import QuizzCreateForm
 from django.db.models import Avg
 from django.shortcuts import redirect
@@ -159,38 +159,6 @@ def import_questions(request):
                 validity = False
             answer = Answer(answer = good_answer_cell, question = question, validity = validity)
             answer.save()
-
-def geography(request, question_wording = 'De quel pays cette vile est elle la capitale : ', question_wording_backward = 'Quelle est la capitale  de ce pays : ', first_column = 0, second_column = 1):
-
-    book = open_workbook('QCM/Capitales.xls')
-    sheet = book.sheet_by_index(0)
-
-    for i in range(sheet.nrows):
-        question_cell = sheet.cell(i,first_column).value
-        question = Question(question = question_wording + " " + question_cell + " ?")
-        question.save()
-        good_answer_cell = sheet.cell(i, second_column).value
-        good_answer = Answer(answer = good_answer_cell, question = question, validity = True)
-        good_answer.save()
-
-        question_cell = sheet.cell(i,second_column).value
-        question1 = Question(question = question_wording_backward + " " + question_cell + " ?")
-        question1.save()
-        good_answer_cell = sheet.cell(i, first_column).value
-        good_answer = Answer(answer = good_answer_cell, question = question1, validity = True)
-        good_answer.save()
-
-        for j in range(3):
-            rand = i
-            while rand == i:
-                rand = randint(0, sheet.nrows - 1)
-            bad_answer_cell = sheet.cell(rand, second_column).value
-            bad_answer = Answer(answer = bad_answer_cell, question = question, validity = False)
-            bad_answer.save()
-
-            bad_answer_cell = sheet.cell(rand, first_column).value
-            bad_answer = Answer(answer = bad_answer_cell, question = question1, validity = False)
-            bad_answer.save()
 
 
 
