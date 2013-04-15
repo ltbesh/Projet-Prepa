@@ -128,3 +128,57 @@ def display_user_profile(request):
         'quizz' : quizz,
         'grade' : grade
     }, context_instance = RequestContext(request))
+
+def import_questions(request):
+
+    book = open_workbook('QCM/Capitales.xls')
+    sheet = book.sheet_by_index(1)
+
+    
+    for i in range(sheet.nrows):
+        question_cell = sheet.cell(i,0).value
+        question = Question(question = question_cell)
+        question.save()
+
+        for j in range(4):
+            good_answer_cell = sheet.cell(i,j + 1).value
+            if j == 0:
+                validity = True
+            else:
+                validity = False
+            answer = Answer(answer = good_answer_cell, question = question, validity = validity)
+            answer.save()
+
+def geography(request):
+
+    book = open_workbook('QCM/Capitales.xls')
+    sheet = book.sheet_by_index(0)
+
+    for i in range(sheet.nrows):
+        question_cell = sheet.cell(i,0).value
+        question = Question(question = question_wording + " " + question_cell + " ?")
+        question.save()
+        good_answer_cell = sheet.cell(i, 1).value
+        good_answer = Answer(answer = good_answer_cell, question = question, validity = True)
+        good_answer.save()
+
+        question_cell = sheet.cell(i,1).value
+        question1 = Question(question = question_wording_backward + " " + question_cell + " ?")
+        question1.save()
+        good_answer_cell = sheet.cell(i, 0).value
+        good_answer = Answer(answer = good_answer_cell, question = question1, validity = True)
+        good_answer.save()
+
+        for j in range(3):
+            rand = i
+            while rand == i:
+                rand = randint(0, sheet.nrows - 1)
+            bad_answer_cell = sheet.cell(rand, 1).value
+            bad_answer = Answer(answer = bad_answer_cell, question = question, validity = False)
+            bad_answer.save()
+
+            bad_answer_cell = sheet.cell(rand, 0).value
+            bad_answer = Answer(answer = bad_answer_cell, question = question1, validity = False)
+            bad_answer.save()
+
+
