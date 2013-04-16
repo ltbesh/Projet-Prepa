@@ -32,21 +32,22 @@ class Chapter(models.Model):# Example : Calculus, algebra ...
 		return self.name
 
 class Question(models.Model):
-	level = models.ManyToManyField(Level)
-	subject = models.ManyToManyField(Subject)
-	chapter = models.ManyToManyField(Chapter)
+	level = models.ForeignKey(Level, null = True)
+	subject = models.ForeignKey(Subject, null = True)
+	chapter = models.ForeignKey(Chapter, null = True)
 	pub_date = models.DateTimeField('date published', default = datetime.now())
 	
 	question = models.CharField(max_length = 2000)
 	
 	def __unicode__ (self):
 		return self.question
+
 	def get_chapter(self):
-		return self.chapter.all()
+		return self.chapter
 	def get_subject(self):
-		return self.subject.all()
+		return self.subject
 	def get_level(self):
-		return self.clevel.all()
+		return self.level
 
 class Quizz(models.Model):
 

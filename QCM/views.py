@@ -8,11 +8,12 @@ from django.contrib.auth.forms import UserCreationForm
 import datetime, random, sha, sys
 from django.shortcuts import render_to_response, get_object_or_404, render
 from django.core.mail import send_mail
-from QCM.models import UserProfile, Quizz, Question, Answer, Guess, News, QuestionStatus
+from QCM.models import UserProfile, Quizz, Question, Answer, Guess, News, QuestionStatus, Chapter, Subject, Level
 from QCM.forms import QuestionSelectionForm
 from django.db.models import Avg
 from django.shortcuts import redirect
 
+from xlrd import open_workbook,XL_CELL_TEXT
 
 @login_required()
 def index(request):
