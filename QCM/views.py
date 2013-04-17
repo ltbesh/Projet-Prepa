@@ -1,5 +1,6 @@
 import datetime, sha, sys
 from xlrd import open_workbook,XL_CELL_TEXT
+from random import randint
 
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect
