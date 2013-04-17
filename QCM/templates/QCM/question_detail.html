@@ -9,17 +9,14 @@
 <ol>
 	{% for answer in answers%}
 		<li>
-			<form  method="post" action=".">
+			<form  method="post" action="{% url question_answer %}">
 			{% csrf_token %}
-			<input type="hidden" name="answer" value="{{answer}}">
-			<input type="hidden" name="question" value="{{question.pk}}">
-			<input type="hidden" name="quizz" value="{{quizz.pk}}">
+			<input type="hidden" name="answer" value="{{answer.id}}">
+			<input type="hidden" name="guess" value="{{guess.id}}">
 			<a class="btn" href="#" onclick="parentNode.submit()">{{answer}}</a>
 			</form>
-			<p>quizz : {{quizz.pk}}</p>
 		</li>
 	{% endfor %}
-
 </ol>
 {% endblock %}
 

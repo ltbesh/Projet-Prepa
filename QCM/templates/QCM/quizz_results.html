@@ -4,9 +4,9 @@
 
 <ol>
 	<h5>
-		{% trans 'Your grade' %} : {{grade}} / 20
+		{% trans 'Your grade' %} : {{quizz.grade}} / 20
 	</h5>
-	{% for question in question_list%}
+	{% for question in corrections%}
 
 	<h6>{{question.0}}</h6>
 	{% if question.1 == question.2%}

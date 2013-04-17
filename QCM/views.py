@@ -1,30 +1,29 @@
+import datetime, sha, sys
+from xlrd import open_workbook,XL_CELL_TEXT
+
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect
-from QCM.models import Question
-from random import randint
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required 
 from django.contrib.auth.forms import UserCreationForm
-import datetime, random, sha, sys
-from django.shortcuts import render_to_response, get_object_or_404, render
 from django.core.mail import send_mail
-from QCM.models import UserProfile, Quizz, Question, Answer, Guess, News, QuestionStatus, Subject, Chapter
-from QCM.forms import QuizzCreateForm
+from django.shortcuts import render_to_response, get_object_or_404, render, redirect
 from django.db.models import Avg
-from django.shortcuts import redirect
-from django.views.generic import CreateView, DetailView, FormView
+from django.views.generic import CreateView, DetailView, UpdateView
 from django.utils.decorators import method_decorator
 
-# Import excel
-from xlrd import open_workbook,XL_CELL_TEXT
+from .models import UserProfile, Quizz, Question, Answer, Guess, News, Subject, Chapter, Level
+from .forms import QuizzCreateForm
 
 @login_required()
 def index(request):
     news = News.objects.all().order_by('date_created')[0:10]
     return render_to_response('QCM/index.html', {'news' : news}, context_instance = RequestContext(request))  
 
-# Create new quizz based on which subject / level / chapter the user choose
 class QuizzCreate(CreateView):
+    """
+    Creates a new quizz based on which subject / level / chapter the user choose on the form
+    """
     model = Quizz        
     form_class = QuizzCreateForm
 
@@ -35,90 +34,62 @@ class QuizzCreate(CreateView):
         quizz.add_question()
         return HttpResponseRedirect(quizz.get_absolute_url())
 
-class QuestionDisplay(DetailView):
-    model = Question
-    context_object_name = "question"
+class QuestionAnswer(UpdateView):
+    model = Guess
 
-    def form_valid(self, form):
-        # We store the guess and redirect to the same view
-        print "form"
-        question = get_object_or_404(Question, pk = request.POST['question'])
-        answer = get_object_or_404(Answer,answer = request.POST['answer'], question = question)
-        quizz = get_object_or_404(Quizz, pk = request.POST['quizz'])
-        guess = Guess.new(quizz,answer) 
+    def post(self, request, *args, **kwargs):
+        guess = Guess.objects.get(pk = request.POST['guess'])
+        quizz = guess.quizz
+        answer = Answer.objects.get(pk = request.POST['answer'])
+        guess.answer = answer
         guess.save()
-
-        question_status = QuestionStatus.objects.get(question = question.id, quizz = quizz.id)
-        question_status.answered = True
-        question_status.save()
-        return redirect('quizz_display', quizz.id)
-
-    def get_context_data(self, **kwargs):
-        print 'context'
-        context = super(QuestionDisplay, self).get_context_data(**kwargs)
-        context['answers'] = Answer.objects.filter(question = self.get_object()).order_by('?')
-        return context
+        return HttpResponseRedirect(quizz.get_absolute_url())
 
 class QuizzDisplay(DetailView):
     """
-    If the quizz is not finished, display an question not answered yet,
-    otherwise display the results of the quizz
+    Depending on the status of the quizz display an unanswered question or the results of the quizz
     """
     model = Quizz
     context_object_name = "quizz"
 
-    def get_context_data(self, **kwargs):
-        quizz = self.get_object()
-        context = super(QuizzDisplay, self).get_context_data(**kwargs)
-        guess_request = Guess.objects.filter(quizz = quizz)
-        question_list = []
-        nb_correct_answer = 0
-
-        for guess in guess_request:
-            if guess.answer.validity:
-                nb_correct_answer += 1
-                correct_answer = guess.answer
-            else:
-                try:
-                    correct_answer = Answer.objects.get(question = guess.answer.question, validity = 1)
-                except:
-                    correct_answer = "Il n'y avait pas de bonne reponse"
-            question_list.append((guess.answer.question, guess.answer, correct_answer))
-
-        context['question_list'] = question_list
-
-        self.compute_grade(nb_correct_answer, float(len(guess_request)))
-
-        return context
-
-    def compute_grade(self, nb_correct_answer, nb_questions):
-        quizz = self.get_object()
-        try:
-            grade = round((nb_correct_answer / nb_questions)) * 20.0
-        except:
-            grade = 0
-        quizz.grade = grade
-        quizz.save()     
-
-    def get(self, request, *args, **kwargs):
-        quizz = self.get_object()
-        # If user does not own quizz
+    def get(self, request, *args, **kwars):
+        self.object = self.get_object()
+        quizz = self.object
         if quizz.user != request.user:
-            return redirect('index')
-        if quizz.finished:
-            return super(QuizzDisplay, self).get(self, request, *args, **kwargs)
+            redirect('/')
+        if quizz.is_finished():
+            self.template_name = 'quizz_results.html'
         else:
-            question = quizz.get_unanswered_question()
-            if question :
-                return redirect('question_display', question.pk)
-            else :
-                return redirect('quizz_display', quizz.id)
-                
+            self.template_name = 'question_detail.html'
+        context = self.get_context_data(object = self.object)
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super(QuizzDisplay, self).get_context_data(**kwargs)
+        self.object = self.get_object()
+        quizz = self.object
+
+        if quizz.finished:
+            corrections = []
+            guess_list = Guess.objects.filter(quizz = quizz)
+            for guess in guess_list:
+                corrections.append(guess.correction())
+            context['corrections'] = corrections
+        else:
+            guess = quizz.get_unanswered_question()
+            context['guess'] = guess
+            question = guess.question
+            context['question'] = question
+            guess = Guess.objects.get(quizz = quizz, question = question)
+            answers = Answer.objects.filter(question = question).order_by('?')
+            context['answers'] = answers
+        return context   
+
 @login_required
 def display_user_profile(request):
 
     quizz = Quizz.objects.filter(user = request.user).order_by('-date_started')
-    form = QuestionSelectionForm()
+    form = QuizzCreateForm()
 
     if request.method == 'POST':
         if 'quizz_id' in request.POST:
@@ -140,25 +111,19 @@ def display_user_profile(request):
         'grade' : grade
     }, context_instance = RequestContext(request))
 
-def import_questions(request):
+def geography(request):
 
-    book = open_workbook('QCM/Capitales.xls')
-    sheet = book.sheet_by_index(1)
+    chapter = Chapter(name = 'capitale')
+    chapter.save()
+    subject = Subject(name = 'geographie')
+    subject.save()
+    level = Level(name = 'college')
+    level.save()
 
-    
-    for i in range(sheet.nrows):
-        question_cell = sheet.cell(i,0).value
-        question = Question(question = question_cell)
-        question.save()
+    question = Question(chapter = chapter, level = level, subject = subject)
+    question.save
 
-        for j in range(4):
-            good_answer_cell = sheet.cell(i,j + 1).value
-            if j == 0:
-                validity = True
-            else:
-                validity = False
-            answer = Answer(answer = good_answer_cell, question = question, validity = validity)
-            answer.save()
+    return redirect("/")
 
 
 
