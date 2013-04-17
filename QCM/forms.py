@@ -1,15 +1,9 @@
 from django.core import validators
 from django.contrib.auth.models import User
-from QCM.models import Subject, Level, Chapter
+from QCM.models import Quizz
 from django import forms
 
-class QuestionSelectionForm(forms.Form):
-	level = forms.ChoiceField(
-		choices = Level.objects.all().values_list(),
-		)	
-	subject = forms.ChoiceField(
-		choices = Subject.objects.all().values_list(),
-		)
-	chapter = forms.ChoiceField(
-		choices = Chapter.objects.all().values_list(),
-		)
+class QuizzCreateForm(forms.ModelForm):
+	class Meta:
+		model = Quizz
+		fields = ('subject', 'level', 'chapter')

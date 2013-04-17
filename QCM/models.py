@@ -6,6 +6,8 @@ import time
 from time import mktime
 from datetime import datetime
 from django.shortcuts import get_object_or_404
+from django.core.urlresolvers import reverse
+
 
 class UserProfile(models.Model): #Used for registration
 	user = models.OneToOneField(User)
@@ -50,44 +52,64 @@ class Question(models.Model):
 		return self.level
 
 class Quizz(models.Model):
-
 	user = models.ForeignKey(User)
-	date_started = models.DateTimeField('date started')
-	questions = models.ManyToManyField(Question, through = 'QuestionStatus')
+	date_started = models.DateTimeField('date started', default = datetime.now())
 	level = models.ForeignKey(Level, null = True)
 	subject = models.ForeignKey(Subject, null = True)
 	chapter = models.ForeignKey(Chapter, null = True)
 	grade = models.IntegerField(default = 0)
 	finished = models.BooleanField(default = False)
+	
 
-	@classmethod
-	def new(cls,user, chapter, subject, level):
-		struct=time.localtime()
-		level = get_object_or_404(Level, pk = level)
-		subject = get_object_or_404(Subject, pk = subject)
-		chapter = get_object_or_404(Chapter, pk = chapter)
-		quizz=cls(user = user, level = level, subject = subject, chapter = chapter, date_started = datetime.fromtimestamp(mktime(struct)))
-		return quizz
-		
-	def append(self, number = 10): #choppe les number questions au hasard dans la bdd question telles que les chapter subjects etc sont ok
-		question_list = Question.objects.filter(chapter = self.chapter, subject = self.subject,level = self.level).order_by('?')[0:number]
+	def is_finished(self):
+		try:
+			guess = Guess.objects.filter(quizz = self, answer = None)[0]
+		except:
+			self.finished = True
+			self.compute_grade()
+			self.save()
+		return self.finished
+
+	def compute_grade(self):
+		"""
+		Calculates the grade for a quizz and return it (the grade is /20)
+		"""
+		guess_list = Guess.objects.filter(quizz = self)
+		nb_correct_answer = 0
+		for guess in guess_list:
+			if guess.answer.validity:
+				nb_correct_answer += 1
+		self.grade = round((nb_correct_answer / float(len(guess_list))) * 20.0)
+		self.save()
+		return self.grade
+
+	def add_question(self, number = 10): 
+		"""
+		Adds number question to the quizz with corresponding subject, level and chapter
+		"""
+		question_list = Question.objects.filter(level = self.level, subject = self.subject, chapter = self.chapter).order_by('?')[0:number]
 		for question in question_list:
-			question_status = QuestionStatus.objects.create(question = question, quizz = self, answered = False)
+			guess = Guess(question = question, quizz = self)
+			guess.save()
+
+	def get_unanswered_question(self):
+		"""
+		Returns a question of the current quizz that has not been answered yet
+		"""
+		if self.is_finished():
+			return None
+		else:
+			return Guess.objects.filter(quizz = self, answer = None)[0]
+		
+	def get_absolute_url(self):
+		return reverse('quizz_display', args=[str(self.id)])
 
 	def __unicode__ (self):
-			return str(self.user) + "--" + str(self.date_started)
-			
-class QuestionStatus(models.Model):
-	question = models.ForeignKey(Question)
-	quizz = models.ForeignKey(Quizz)
-	answered = models.BooleanField(default = False)	
-
-	def __unicode__ (self):
-			return str(self.answered)
+			return str(self.user) + "--" + str(self.date_started) + '--' + str(self.level)
 
 class Answer(models.Model):
-	question = models.ForeignKey(Question)
 	answer = models.CharField(max_length = 200)
+	question = models.ForeignKey(Question)
 	validity = models.BooleanField()
 
 	def __unicode__ (self):
@@ -95,18 +117,26 @@ class Answer(models.Model):
 
 class Guess(models.Model):
 	quizz = models.ForeignKey(Quizz)
-	answer = models.ForeignKey(Answer)
-	answer_date = models.DateTimeField('date answered')
+	question = models.ForeignKey(Question)
+	answer = models.ForeignKey(Answer, blank = True, null = True)
+	answer_date = models.DateTimeField('date answered', default = datetime.now())
 
-	@classmethod
-	def new(cls,use,ans):
-		struct=time.localtime()
-		quizz=cls(quizz=use,answer=ans,answer_date=datetime.fromtimestamp(mktime(struct)))
-		return quizz
+	def get_correct_answer(self):
+		try :
+			correct_answer = Answer.objects.get(question = self.question, validity = True)
+		except:
+			correct_answer = "Il n'y avait pas de bonne reponse"
+		return correct_answer
+
+	def correction(self):
+		return (self.question, self.answer, self.get_correct_answer())
+
+	def __unicode__ (self):
+			return str(self.quizz.id) + "--" + str(self.question.id) + '--' + str(self.answer)
+
 
 class News(models.Model):
 	author  = models.ForeignKey(User)
 	date_created = models.DateTimeField()
 	title = models.CharField(max_length = 200)
 	content = models.TextField()
-
